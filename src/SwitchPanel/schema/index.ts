@@ -1,8 +1,13 @@
-import { types, Instance, IAnyModelType } from 'mobx-state-tree';
+import { types, Instance, IAnyModelType, destroy } from 'mobx-state-tree';
 
 import { debugModel } from '../../lib/debug';
-import { pick, invariant } from '../../lib/util';
-import { updateModelAttribute, updatePanel } from './util';
+import { pick, invariant, isExist } from '../../lib/util';
+import {
+  updateModelAttribute,
+  updatePanel,
+  findById,
+  createPanel
+} from './util';
 import { IPanel } from '../index';
 
 // export enum ECodeLanguage {
@@ -49,7 +54,7 @@ export const PanelModel = types
   .actions(self => {
     return {
       updateAttribute(name: string, value: any) {
-       return updatePanel(self as any, name, value);
+        return updatePanel(self as any, name, value);
       }
     };
   });
@@ -81,17 +86,15 @@ export const SwitchPanelModel = types
         return pick(self, filters);
       },
 
-      findPanel(id: string) {
-        let target = null;
-        if (!id) return target;
-        self.panels.some(panel => {
-          if (panel.id === id) {
-            target = panel;
-            return true;
-          }
-          return false;
-        });
-        return target;
+      get panelIds() {
+        return self.panels.map(o => o.id);
+      },
+
+      /**
+       * 根据 id 返回后代节点（不一定是直系子节点），如果有过滤条件，则返回符合过滤条件的节点
+       */
+      findPanel(id: string, filterArray?: string | string[]) {
+        return findById(self as any, id, filterArray);
       }
     };
   })
@@ -111,6 +114,32 @@ export const SwitchPanelModel = types
   })
   .actions(self => {
     return {
+      addPanel(targetIndex: number, panel: IPanel): boolean {
+        const len = self.panelIds.length;
+        if (targetIndex > len || targetIndex < 0) {
+          debugModel(
+            `[addPanel] 目标 index: ${targetIndex} 超出可插入数组范围 [0, ${len}]`
+          );
+          return false;
+        }
+        const hasExist = !!~self.panelIds.indexOf(panel.id);
+        if (hasExist) {
+          debugModel(`[addPanel] 已经存在 id 为 ${panel.id} 的 panel`);
+          return false;
+        }
+
+        const model = createPanel(panel);
+        // 通过 slice 转成数组实现 splice
+        const panels = self.panels.slice();
+        panels.splice(targetIndex, 0, model);
+        self.panels = panels as any;
+
+        return true;
+      }
+    };
+  })
+  .actions(self => {
+    return {
       updateAttribute(name: string, value: any) {
         return updateModelAttribute(self as any, name, value);
       },
@@ -125,12 +154,29 @@ export const SwitchPanelModel = types
       ): boolean => {
         if (!id) return false;
         // 首先找到 panel
-        const panel = self.findPanel(id);
+        const panel = self.findPanel(id) as IPanelModel;
 
         // 找到节点后调用方法去更新
         if (!!panel) {
-          return panel.updateAttribute(attrName, value)
+          return panel.updateAttribute(attrName, value);
         }
+        return false;
+      }
+    };
+  })
+  .actions(self => {
+    return {
+      removePanel(id: string): false | IPanelModel {
+        if (!id) return false;
+
+        const panel = self.findPanel(id); // 找到指定的节点
+
+        if (panel) {
+          const panelRemoved = (panel as any).toJSON();
+          destroy(panel as IPanelModel); // 从 mst 中移除节点
+          return panelRemoved;
+        }
+
         return false;
       }
     };

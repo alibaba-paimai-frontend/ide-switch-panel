@@ -164,6 +164,7 @@ export const SwitchPanelAddStore = (stores: IStoresModel) =>
     const { codeEditor, switchPanel, height } = stores;
     const { panels, selectedPanelId } = switchPanel;
     const { onChange, ...otherCodeEditorEvent } = codeEditorEvent;
+    debugRender(`[${stores.id}] rendering`);
     return (
       <SwitchPanel
         height={height}

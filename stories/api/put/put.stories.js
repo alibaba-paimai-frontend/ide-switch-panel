@@ -25,7 +25,7 @@ const codeEditorEvent = {
 function onSwitch(panel, index) {
   console.log('当前值：', panel, index);
 
-  client1.get(`/clients/editor`).then(res => {
+  client.get(`/clients/editor`).then(res => {
     const { status, body } = res;
     if (status === 200) {
       const config = body.config;
@@ -100,7 +100,7 @@ function updateById() {
 
 storiesOf('API - put', module)
   .addParameters(wInfo(mdPut))
-  .addWithJSX('/panels 更改属性', () => {
+  .addWithJSX('/panels/:id 更改属性', () => {
     return (
       <Row style={styles.demoWrap}>
         <Col span={10} offset={2}>

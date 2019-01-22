@@ -5,6 +5,7 @@ import { router as GetRouter } from '../router/get';
 import { router as PostRouter } from '../router/post';
 import { router as PutRouter } from '../router/put';
 import { router as DelRouter } from '../router/del';
+import { debugIO } from '../../lib/debug';
 
 export const AppFactory = function(stores: IStoresModel, innerApps?: object) {
   const app = new Application({ domain: 'switch-panel' });
@@ -13,7 +14,13 @@ export const AppFactory = function(stores: IStoresModel, innerApps?: object) {
   app.use((ctx: any, next: any) => {
     ctx.stores = stores;
     ctx.innerApps = innerApps;
-    return next();
+    debugIO(`[${stores.id}] request: ${JSON.stringify(ctx.request.toJSON())}`);
+    next();
+    debugIO(
+      `[${stores.id}] [${ctx.request.method}] ${
+        ctx.request.url
+      } ==> response: ${JSON.stringify(ctx.response.toJSON())}`
+    );
   });
 
   // 进行路由代理，要放在路由挂载之前
@@ -28,10 +35,7 @@ export const AppFactory = function(stores: IStoresModel, innerApps?: object) {
   // 这里必须使用 async/await 方式，否则返回的 res 总是 404
   app.use(async (ctx: any, next: any) => {
     const { innerApps } = ctx;
-    await (proxyEditor(innerApps.codeEditor) as middlewareFunction)(
-      ctx,
-      next
-    );
+    await (proxyEditor(innerApps.codeEditor) as middlewareFunction)(ctx, next);
   });
 
   // 注册路由

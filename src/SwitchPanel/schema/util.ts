@@ -1,6 +1,6 @@
 import { types, destroy, IAnyModelType, Instance } from 'mobx-state-tree';
 import { debugModel } from '../../lib/debug';
-import { invariant, capitalize, pick } from '../../lib/util';
+import { invariant, capitalize, pick, isExist } from '../../lib/util';
 import {
   ISwitchPanelProps,
   IPanel,
@@ -40,6 +40,14 @@ export function createModel(modelObject: IPanelProps = {}): ISwitchPanelModel {
  */
 export function createEmptyModel() {
   return createModel({});
+}
+
+export function createPanel(panel: IPanel) : IPanelModel{
+  invariant(isExist(panel.id), '创建 panel 必须要存在 id 属性');
+  const {id, title='untitle'} = panel;
+  return PanelModel.create({
+    id, title
+  });
 }
 
 export function findById(

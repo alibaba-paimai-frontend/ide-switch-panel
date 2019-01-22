@@ -2,10 +2,10 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { Row, Col, Input, Button } from 'antd';
 import { wInfo } from '../../../.storybook/utils';
-import mdDel from './del.md';
+import mdPost from './post.md';
 
 import { SwitchPanelFactory } from '../../../src';
-import { modelPropsGen } from '../../helper';
+import { modelPropsGen, panelGen } from '../../helper';
 
 const { SwitchPanelWithStore, client } = SwitchPanelFactory();
 
@@ -37,7 +37,6 @@ function onSwitch(panel, index) {
   });
 }
 
-
 const createNew = client => () => {
   const { panels } = modelPropsGen();
   client.post('/panels', { panels: panels });
@@ -51,56 +50,43 @@ const createNew = client => () => {
   });
 };
 
-function resetPanels() {
-  client.del('/panels').then(res => {
-    const { status, body } = res;
-    if (status === 200) {
-      const panels = body.panels;
-      document.getElementById('info').innerText =
-        `清空 panels: \n` +
-        JSON.stringify(panels.toJSON ? panels.toJSON() : panels, null, 4);
-    }
-  });
-}
-
-function removeById() {
-  const id = document.getElementById('panelId').value;
+function addNewPanel() {
+  const id = document.getElementById('panelIndex').value;
   if (!id) {
-    document.getElementById('info').innerText = '请输入 id';
+    document.getElementById('info').innerText = '请输入目标位置';
     return;
   }
 
   // 更新节点属性，返回更新后的数值
   client
-    .del(`/panels/${id}`)
+    .post(`/panels/indexes/${id}`, { panel: panelGen() })
     .then(res => {
       const { status, body } = res;
-      if (status === 200) {
-        const panel = body.panel;
+      const { success, targetIndex } = body;
+      if (status === 200 && success) {
+        const targetIndex = body.targetIndex;
         document.getElementById('info').innerText =
-          `清空 id 为 ${panel.id} 的 panel: \n` +
-          JSON.stringify(panel.toJSON ? panel.toJSON() : panel, null, 4);
+          `在 index ${targetIndex} 处新增 panel: \n`;
       }
     })
     .catch(err => {
       document.getElementById('info').innerText =
-        `更新失败： \n` + JSON.stringify(err, null, 4);
+        `新增失败： \n` + JSON.stringify(err, null, 4);
     });
 }
 
-storiesOf('API - del', module)
-  .addParameters(wInfo(mdDel))
-  .addWithJSX('/panels/:id 移除指定 panel', () => {
+storiesOf('API - post', module)
+  .addParameters(wInfo(mdPost))
+  .addWithJSX('/panels/panel/:index 在指定位置新增 panel', () => {
     return (
       <Row style={styles.demoWrap}>
         <Col span={10} offset={2}>
           <Row>
             <Col span={4}>
-              <Input placeholder="panel ID" id="panelId" />
+              <Input placeholder="目标位置 index" id="panelIndex" />
             </Col>
             <Col span={20}>
-              <Button onClick={removeById}>移除 panel</Button>
-              <Button onClick={resetPanels}>清空 panel</Button>
+              <Button onClick={addNewPanel}>新增 panel</Button>
               <Button onClick={createNew(client)}>随机创建</Button>
             </Col>
           </Row>

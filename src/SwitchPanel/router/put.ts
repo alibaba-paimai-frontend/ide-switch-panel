@@ -4,20 +4,18 @@ import { getEnv } from 'mobx-state-tree';
 export const router = new Router();
 
 // 更新 store 属性
-(router as any).put('panels', '/panels', function(ctx: IContext) {
+router.put('panels', '/panels', async function(ctx: IContext) {
   const { stores, request } = ctx;
   const { name, value } = request.data;
 
   const isSuccess = stores.updateAttribute(name, value);
 
   // 同时需要调整 editor 的高度
-  if(name === 'height') {
+  if (name === 'height') {
     const { codeEditorClient } = getEnv(stores);
-    console.log(777, value);
-    codeEditorClient.put('/editor', { name: 'height', value: `${value - 30}`}).then((res: any)=>{
-      console.log(888, res);
-    })
-  };
+    await codeEditorClient
+      .put('/editor', { name, value: `${value - 30}` });
+  }
 
   ctx.response.body = {
     success: isSuccess
@@ -26,7 +24,7 @@ export const router = new Router();
 });
 
 // 更新指定 panel 的属性
-(router as any).put('panels', '/panels/:id', function(ctx: IContext) {
+router.put('panels', '/panels/:id', function(ctx: IContext) {
   const { stores, request } = ctx;
   const { name, value } = request.data;
   const { id } = ctx.params;
@@ -39,7 +37,7 @@ export const router = new Router();
 });
 
 // 更新选择
-(router as any).put('panels', '/panels/selection/:id', function(ctx: IContext) {
+router.put('panels', '/panels/selection/:id', function(ctx: IContext) {
   const { stores, params } = ctx;
   const { id } = params;
 

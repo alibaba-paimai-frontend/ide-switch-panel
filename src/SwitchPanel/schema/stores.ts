@@ -27,7 +27,7 @@ export const Stores = types
       setSwitchPanel(model: ISwitchPanelModel) {
         self.switchPanel = model;
       },
-      setHeight(h: number|string) {
+      setHeight(h: number | string) {
         self.height = h;
       }
     };
@@ -36,6 +36,19 @@ export const Stores = types
     return {
       updateAttribute(name: string, value: any) {
         updateStoresAttribute(self as any, name, value);
+      }
+    };
+  })
+  .actions(self => {
+    return {
+      /**
+       * 重置 schema，相当于创建空树
+       * 影响范围：整棵树
+       */
+      resetToEmpty() {
+        const panelsRemoved = (self!.switchPanel as any).toJSON();
+        self.setSwitchPanel(createEmptyModel());
+        return panelsRemoved;
       }
     };
   });
