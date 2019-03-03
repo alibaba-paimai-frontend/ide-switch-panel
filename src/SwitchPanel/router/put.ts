@@ -29,7 +29,7 @@ router.put('panels', '/panels/:id', function(ctx: IContext) {
   const { name, value } = request.data;
   const { id } = ctx.params;
 
-  const isSuccess = stores.switchPanel.updateAttributeById(id, name, value);
+  const isSuccess = stores.model.updateAttributeById(id, name, value);
   ctx.response.body = {
     success: isSuccess
   };
@@ -42,7 +42,7 @@ router.put('panels', '/panels/selection/:id', function(ctx: IContext) {
   const { id } = params;
 
   // stores.setSchema(createSchemaModel(schema));
-  stores.switchPanel.setSelectedPanelId(id);
+  stores.model.setSelectedPanelId(id);
 
   ctx.response.status = 200;
 });

@@ -17,7 +17,7 @@ router.del('panels', '/panels', function(ctx: IContext) {
   const { stores, params } = ctx;
   const { id } = params;
 
-  const result = stores.switchPanel.removePanel(id);
+  const result = stores.model.removePanel(id);
 
   ctx.response.body = {
       panel: result

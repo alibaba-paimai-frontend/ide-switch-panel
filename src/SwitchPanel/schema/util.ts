@@ -1,6 +1,7 @@
-import { types, destroy, IAnyModelType, Instance } from 'mobx-state-tree';
+import { updateInScope, BASE_CONTROLLED_KEYS } from 'ide-lib-base-component'
+import { invariant, capitalize, pick, isExist } from 'ide-lib-utils';
+
 import { debugModel } from '../../lib/debug';
-import { invariant, capitalize, pick, isExist } from '../../lib/util';
 import {
   ISwitchPanelProps,
   IPanel,
@@ -73,33 +74,14 @@ export function findById(
 /* ----------------------------------------------------
     更新指定 enum 中的属性
 ----------------------------------------------------- */
-const update = (valueSet: string[]) => (
-  item: ISwitchPanelModel | IStoresModel,
-  attrName: string,
-  value: any
-): boolean => {
-  invariant(!!item, '入参 item 必须存在');
-  // 如果不是可更新的属性，那么将返回 false
-  if (!valueSet.includes(attrName)) {
-    debugModel(
-      `[更新属性] 属性名 ${attrName} 不属于可更新范围，无法更新成 ${value} 值；（附:可更新属性列表：${valueSet}）`
-    );
-    return false;
-  }
-
-  const functionName = `set${capitalize(attrName)}`; // 比如 attrName 是 `type`, 则调用 `setType` 方法
-  (item as any)[functionName](value);
-  return true;
-};
-
 // 定义 panel 可更新信息的属性
 const PANEL_EDITABLE_ATTRIBUTE = ['id', 'title'];
-export const updatePanel = update(PANEL_EDITABLE_ATTRIBUTE);
+export const updatePanel = updateInScope(PANEL_EDITABLE_ATTRIBUTE);
 
 // 定义 panels 可更新信息的属性
-const EDITABLE_ATTRIBUTE = ['selectedPanelId', 'panels'];
-export const updateModelAttribute = update(EDITABLE_ATTRIBUTE);
+const EDITABLE_ATTRIBUTE = BASE_CONTROLLED_KEYS.concat(['selectedPanelId', 'panels']);
+export const updateModelAttribute = updateInScope(EDITABLE_ATTRIBUTE);
 
 // 定义 switch panel 可更新信息的属性
 const STORES_EDITABLE_ATTRIBUTE = ['height'];
-export const updateStoresAttribute = update(STORES_EDITABLE_ATTRIBUTE);
+export const updateStoresAttribute = updateInScope(STORES_EDITABLE_ATTRIBUTE);

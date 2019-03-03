@@ -1,17 +1,31 @@
-import React, { Component } from 'react';
-import { observer } from 'mobx-react';
+import React, { Component, useCallback } from 'react';
+import { observer } from 'mobx-react-lite';
 import { Button } from 'antd';
+import { pick } from 'ide-lib-utils';
+import { based, Omit, OptionalProps, IBaseTheme, IBaseComponentProps, IStoresEnv, useIndectedEvents, extracSubEnv } from 'ide-lib-base-component';
+
 import {
   CodeEditor,
-  ICodeEditorEvent,
+  CodeEditorAddStore,
   ICodeEditorProps,
+  TCodeEditorControlledKeys,
   onChangeWithStore
 } from 'ide-code-editor';
 
 import { StoresFactory, IStoresModel } from './schema/stores';
+import { TSwitchPanelControlledKeys, CONTROLLED_KEYS } from './schema/index';
 import { AppFactory } from './controller/index';
 import { debugInteract, debugRender } from '../lib/debug';
 import { StyledContainer, StyledButtonGroup } from './styles';
+
+
+type OptionalCodeEditorProps = OptionalProps<
+  ICodeEditorProps,
+  TCodeEditorControlledKeys
+>;
+interface ISubComponents {
+  CodeEditorComponent: React.ComponentType<OptionalCodeEditorProps>;
+}
 
 export interface IPanel {
   id: string;
@@ -45,18 +59,21 @@ export interface IPanelProps extends IPanelEvent {
   selectedPanelId?: string;
 }
 
-export interface ISwitchPanelEvent {
-  codeEditorEvent: ICodeEditorEvent;
+
+export interface ISwitchPanelTheme extends IBaseTheme{
+  main: string;
 }
 
-export interface ISwitchPanelProps extends ISwitchPanelEvent, IPanelProps {
+export interface ISwitchPanelEvent {}
+
+export interface ISwitchPanelProps extends ISwitchPanelEvent, IPanelProps, IBaseComponentProps {
   /**
    * 代码编辑器属性对象
    *
-   * @type {ICodeEditorStoresModel}
+   * @type {OptionalCodeEditorProps}
    * @memberof ISwitchPanelProps
    */
-  codeEditor?: ICodeEditorProps;
+  codeEditor?: OptionalCodeEditorProps;
 
   /**
    * 容器的宽度或高度
@@ -67,71 +84,66 @@ export interface ISwitchPanelProps extends ISwitchPanelEvent, IPanelProps {
   height?: number | string;
 }
 
-@observer
-export class Panels extends Component<IPanelProps> {
-  onSwitchPanel = (panel: IPanel, index: number) => () => {
-    const { onSwitch } = this.props;
-    onSwitch && onSwitch(panel, index);
-  };
-  render() {
-    const { panels = [], selectedPanelId } = this.props;
 
-    return (
-      (panels.length && (
-        <StyledButtonGroup>
-          {panels.map((panel, i) => {
-            const { title, id } = panel;
-            return (
-              <Button
-                type={selectedPanelId === id ? 'primary' : 'default'}
-                onClick={this.onSwitchPanel(panel, i)}
-                style={{
-                  flex: '1',
-                  height: '30px'
-                }}
-                size={'large'}
-                key={'' + i}
-              >
-                {title}
-              </Button>
-            );
-          })}
-        </StyledButtonGroup>
-      )) ||
-      null
-    );
+export const Panels = observer((props: IPanelProps) => {
+  const onSwitchPanel = useCallback((panel: IPanel, index: number) => () => {
+    props.onSwitch && props.onSwitch(panel, index);
+  }, []);
+
+  const { panels = [], selectedPanelId } = props;
+  return (
+    (panels.length && (
+      <StyledButtonGroup>
+        {panels.map((panel, i) => {
+          const { title, id } = panel;
+          return (
+            <Button
+              type={selectedPanelId === id ? 'primary' : 'default'}
+              onClick={onSwitchPanel(panel, i)}
+              style={{
+                flex: '1',
+                height: '30px'
+              }}
+              size={'large'}
+              key={'' + i}
+            >
+              {title}
+            </Button>
+          );
+        })}
+      </StyledButtonGroup>
+    )) ||
+    null
+  );
+});
+
+
+export const DEFAULT_PROPS: ISwitchPanelProps = {
+  theme: {
+    main: '#25ab68'
+  },
+  styles: {
+    container: {}
   }
-}
-
-// 推荐使用 decorator 的方式，否则 stories 的导出会缺少 **Prop Types** 的说明
-// 因为 react-docgen-typescript-loader 需要  named export 导出方式
-@observer
-export class SwitchPanel extends Component<ISwitchPanelProps> {
-  // private root: React.RefObject<HTMLDivElement>;
-  constructor(props: ISwitchPanelProps) {
-    super(props);
-    this.state = {};
-    // this.root = React.createRef();
-  }
-
-  render() {
-    const {
-      codeEditor = {},
-      codeEditorEvent,
-      panels,
+};
+export const SwitchPanelHOC = (subComponents: ISubComponents) => {
+  const SwitchPanelHOC = (props: ISwitchPanelProps = DEFAULT_PROPS) => {
+    const { CodeEditorComponent } = subComponents;
+    const mergedProps = Object.assign({}, DEFAULT_PROPS, props);
+    const { codeEditor, styles, panels,
       selectedPanelId,
       height,
-      onSwitch
-    } = this.props;
+      onSwitch } = mergedProps;
 
     return (
       <StyledContainer
+        style={styles.container}
         height={height}
         width={codeEditor.width || 800}
         // ref={this.root}
         className="ide-switch-panel-container"
       >
-        <CodeEditor {...codeEditor} {...codeEditorEvent} />
+        <CodeEditorComponent {...codeEditor} />
         <Panels
           panels={panels}
           selectedPanelId={selectedPanelId}
@@ -139,58 +151,80 @@ export class SwitchPanel extends Component<ISwitchPanelProps> {
         />
       </StyledContainer>
     );
-  }
-}
+  };
+  SwitchPanelHOC.displayName = 'SwitchPanelHOC';
+  return observer(based(SwitchPanelHOC));
+};
+
+// 采用高阶组件方式生成普通的 SwitchPanel 组件
+export const SwitchPanel = SwitchPanelHOC({
+  CodeEditorComponent: CodeEditor
+});
 
 /* ----------------------------------------------------
     以下是专门配合 store 时的组件版本
 ----------------------------------------------------- */
 
-export const onSwitchWithStore = (
-  stores: IStoresModel,
-  onSwitch: (panel: IPanel, index: number) => void
-) => (panel: IPanel, index: number) => {
-  // 更新选中的 Panel 状态
-  stores.switchPanel.setSelectedPanelId(panel.id);
-  onSwitch && onSwitch(panel, index);
-};
 /**
  * 科里化创建 SwitchPanelWithStore 组件
  * @param stores - store 模型实例
  */
-export const SwitchPanelAddStore = (stores: IStoresModel) =>
-  observer(function SwitchPanelWithStore(props: ISwitchPanelProps) {
-    const { onSwitch, codeEditorEvent = {}, ...otherPops } = props;
-    const { codeEditor, switchPanel, height } = stores;
-    const { panels, selectedPanelId } = switchPanel;
-    const { onChange, ...otherCodeEditorEvent } = codeEditorEvent;
-    debugRender(`[${stores.id}] rendering`);
-    return (
-      <SwitchPanel
-        height={height}
-        codeEditor={codeEditor!.editor as any}
-        panels={panels}
-        selectedPanelId={selectedPanelId}
-        onSwitch={onSwitchWithStore(stores, onSwitch)}
-        codeEditorEvent={{
-          onChange: onChangeWithStore(codeEditor, onChange),
-          ...otherCodeEditorEvent
-        }}
-        {...otherPops}
+export const SwitchPanelAddStore = (storesEnv: IStoresEnv<IStoresModel>) => {
+  const { stores } = storesEnv;
+  const SwitchPanelHasSubStore = SwitchPanelHOC({
+    CodeEditorComponent: CodeEditorAddStore(stores.codeEditor, extracSubEnv(storesEnv, 'codeEditor'))
+  });
+
+  const SwitchPanelWithStore = (props: Omit<ISwitchPanelProps, TSwitchPanelControlledKeys>) => {
+  const { codeEditor,...otherProps } = props;
+  const { model } = stores;
+  const controlledProps = pick(model, CONTROLLED_KEYS);
+  debugRender(`[${stores.id}] rendering`);
+
+  const codeEditorWithInjected = useIndectedEvents<ICodeEditorProps, IStoresModel>(storesEnv, codeEditor, {
+    'onChange': []
+  });
+
+    const otherPropsWithInjected = useIndectedEvents<ISwitchPanelProps, IStoresModel>(storesEnv, otherProps, {
+    'onSwitch': []
+  });
+
+  return (
+      <SwitchPanelHasSubStore
+      codeEditor={codeEditorWithInjected }
+      {...controlledProps }
+      {...otherPropsWithInjected }
       />
     );
-  });
+};
+
+  SwitchPanelWithStore.displayName = 'SwitchPanelWithStore';
+  return observer(SwitchPanelWithStore);
+}
+  
+
 /**
- * 工厂函数，每调用一次就获取一副 MVC
- * 用于隔离不同的 SwitchPanelWithStore 的上下文
+ * 生成 env 对象，方便在不同的状态组件中传递上下文
  */
-export const SwitchPanelFactory: any = () => {
+export const SwitchPanelStoresEnv = () => {
   const { stores, innerApps } = StoresFactory(); // 创建 model
   const app = AppFactory(stores, innerApps); // 创建 controller，并挂载 model
   return {
     stores,
     app,
     client: app.client,
-    SwitchPanelWithStore: SwitchPanelAddStore(stores)
+    innerApps: innerApps
   };
+}
+
+/**
+ * 工厂函数，每调用一次就获取一副 MVC
+ * 用于隔离不同的 SwitchPanelWithStore 的上下文
+ */
+export const SwitchPanelFactory = () => {
+  const storesEnv = SwitchPanelStoresEnv();
+  return {
+    ...storesEnv,
+    SwitchPanelWithStore: SwitchPanelAddStore(storesEnv)
+  }
 };

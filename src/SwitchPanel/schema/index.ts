@@ -1,7 +1,9 @@
-import { types, Instance, IAnyModelType, destroy } from 'mobx-state-tree';
+import { types, Instance, IAnyModelType, destroy, SnapshotOrInstance } from 'mobx-state-tree';
+import { pick } from 'ide-lib-utils';
+import { BaseModel, TBaseControlledKeys, BASE_CONTROLLED_KEYS } from 'ide-lib-base-component';
+
 
 import { debugModel } from '../../lib/debug';
-import { pick, invariant, isExist } from '../../lib/util';
 import {
   updateModelAttribute,
   updatePanel,
@@ -16,6 +18,16 @@ import { IPanel } from '../index';
 //   TS = 'typescript'
 // }
 // export const CODE_LANGUAGES = Object.values(ECodeLanguage);
+
+// 获取被 store 控制的 model key 的列表
+export type TPanelControlledKeys =
+  keyof SnapshotOrInstance<typeof PanelModel>;
+
+// 定义被 store 控制的 model key 的列表，没法借用 ts 的能力动态从 TSwitchPanelControlledKeys 中获取
+export const PANEL_CONTROLLED_KEYS: string[] = [
+  'id',
+  'title',
+];
 
 export const PanelModel = types
   .model('PanelModel', {
@@ -34,7 +46,7 @@ export const PanelModel = types
       /**
        * 只返回当前模型的属性，可以通过 filter 字符串进行属性项过滤
        */
-      allAttibuteWithFilter(filterArray?: string | string[]) {
+      allAttibuteWithFilter(filterArray: string | string[] = PANEL_CONTROLLED_KEYS) {
         if (!filterArray) return self;
         const filters = [].concat(filterArray || []);
         return pick(self, filters);
@@ -61,11 +73,21 @@ export const PanelModel = types
 
 export interface IPanelModel extends Instance<typeof PanelModel> {}
 
+
+// 获取被 store 控制的 model key 的列表
+export type TSwitchPanelControlledKeys =
+  keyof SnapshotOrInstance<typeof SwitchPanelModel> | TBaseControlledKeys;
+
+// 定义被 store 控制的 model key 的列表，没法借用 ts 的能力动态从 TSwitchPanelControlledKeys 中获取
+export const CONTROLLED_KEYS: string[] = BASE_CONTROLLED_KEYS.concat([
+  'title'
+]);
 /**
  * SwitchPanel 对应的模型
  */
-export const SwitchPanelModel = types
-  .model('SwitchPanelModel', {
+export const SwitchPanelModel = BaseModel
+  .named('SwitchPanelModel')
+  .props({
     selectedPanelId: types.optional(types.string, ''),
     // language: types.optional(
     //   types.enumeration('Type', CODE_LANGUAGES),

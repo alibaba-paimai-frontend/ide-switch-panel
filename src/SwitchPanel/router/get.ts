@@ -13,7 +13,7 @@ router.get('panels', '/panels', function(ctx: IContext) {
   const { query } = request;
   const filterArray = query && query.filter && query.filter.trim().split(',');
   ctx.response.body = {
-    attributes: stores.switchPanel.allAttibuteWithFilter(filterArray)
+    attributes: stores.model.allAttibuteWithFilter(filterArray)
   };
   ctx.response.status = 200;
 });
@@ -25,7 +25,7 @@ router.get('panels', '/panels/:id', function(ctx: IContext) {
   const { id } = ctx.params;
   const filterArray = query && query.filter && query.filter.trim().split(',');
   ctx.response.body = {
-    panel: findById(stores.switchPanel, id, filterArray)
+    panel: findById(stores.model, id, filterArray)
   };
   ctx.response.status = 200;
 });
