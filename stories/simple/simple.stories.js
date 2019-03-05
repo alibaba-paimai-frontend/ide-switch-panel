@@ -34,7 +34,7 @@ const codeEditorEvent = {
 
 const propsModel = createModel(propsNormal);
 
-function onClick(panel, index) {
+function onSwitch(panel, index) {
   console.log('当前值：', panel, index);
 }
 
@@ -50,8 +50,12 @@ storiesOf('基础使用', module)
   .addParameters(wInfo(mdMobx))
   .addWithJSX('使用 mobx 化的 props', () => {
     const SwitchPanelWithStore = SwitchPanelAddStore({
-      switchPanel: propsModel,
-      codeEditor
+      stores: {
+        model: propsModel,
+        codeEditor:{
+          model: codeEditor
+        }
+      }
     });
     return (
       <div>
@@ -59,8 +63,10 @@ storiesOf('基础使用', module)
           更改选中的 panel（会响应）
         </button>
         <SwitchPanelWithStore
-          codeEditorEvent={codeEditorEvent}
-          onSwitch={onClick}
+          codeEditor={{
+            onChange: codeEditorEvent.onChange
+          }}
+          onSwitch={onSwitch}
         />
       </div>
     );
@@ -73,9 +79,11 @@ storiesOf('基础使用', module)
       </button>
       <SwitchPanel
         {...propsNormal}
-        codeEditor={codeEditor}
-        codeEditorEvent={codeEditorEvent}
-        onSwitch={onClick}
+        onEditor={{
+          ...codeEditor,
+          onChange: codeEditorEvent.onChange
+        }}
+        onSwitch={onSwitch}
       />
     </div>
   ));

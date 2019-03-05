@@ -6,10 +6,10 @@ import { based, Omit, OptionalProps, IBaseTheme, IBaseComponentProps, IStoresEnv
 
 import {
   CodeEditor,
+  IStoresModel as ICodeEditorStoresModel,
   CodeEditorAddStore,
   ICodeEditorProps,
-  TCodeEditorControlledKeys,
-  onChangeWithStore
+  TCodeEditorControlledKeys
 } from 'ide-code-editor';
 
 import { StoresFactory, IStoresModel } from './schema/stores';
@@ -119,6 +119,9 @@ export const Panels = observer((props: IPanelProps) => {
 
 
 export const DEFAULT_PROPS: ISwitchPanelProps = {
+  codeEditor: {
+    width: 800
+  },
   theme: {
     main: '#25ab68'
   },
@@ -126,6 +129,7 @@ export const DEFAULT_PROPS: ISwitchPanelProps = {
     container: {}
   }
 };
+
 export const SwitchPanelHOC = (subComponents: ISubComponents) => {
   const SwitchPanelHOC = (props: ISwitchPanelProps = DEFAULT_PROPS) => {
     const { CodeEditorComponent } = subComponents;
@@ -139,7 +143,7 @@ export const SwitchPanelHOC = (subComponents: ISubComponents) => {
       <StyledContainer
         style={styles.container}
         height={height}
-        width={codeEditor.width || 800}
+        width={codeEditor.width}
         // ref={this.root}
         className="ide-switch-panel-container"
       >
@@ -172,7 +176,8 @@ export const SwitchPanel = SwitchPanelHOC({
 export const SwitchPanelAddStore = (storesEnv: IStoresEnv<IStoresModel>) => {
   const { stores } = storesEnv;
   const SwitchPanelHasSubStore = SwitchPanelHOC({
-    CodeEditorComponent: CodeEditorAddStore(stores.codeEditor, extracSubEnv(storesEnv, 'codeEditor'))
+    // @ts-ignore
+    CodeEditorComponent: CodeEditorAddStore(extracSubEnv<IStoresModel, ICodeEditorStoresModel>(storesEnv, 'codeEditor'))  
   });
 
   const SwitchPanelWithStore = (props: Omit<ISwitchPanelProps, TSwitchPanelControlledKeys>) => {

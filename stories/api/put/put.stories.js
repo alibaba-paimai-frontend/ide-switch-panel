@@ -129,7 +129,7 @@ storiesOf('API - put', module)
 
           <SwitchPanelWithStore
             onSwitch={onSwitch}
-            codeEditorEvent={codeEditorEvent}
+            codeEditor={codeEditorEvent}
           />
         </Col>
         <Col span={12}>

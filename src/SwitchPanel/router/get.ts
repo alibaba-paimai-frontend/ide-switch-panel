@@ -1,5 +1,6 @@
 import Router from 'ette-router';
-import { getEnv } from 'mobx-state-tree';
+import { getInnerAppsMiddleware } from 'ide-lib-base-component';
+
 
 import { IContext } from './helper';
 import { findById } from '../schema/util';
@@ -29,3 +30,6 @@ router.get('panels', '/panels/:id', function(ctx: IContext) {
   };
   ctx.response.status = 200;
 });
+
+router.get('clients', '/innerApps/:name', getInnerAppsMiddleware);
+

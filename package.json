@@ -5,7 +5,7 @@
   "main": "dist/index.umd.js",
   "module": "dist/index.umd.js",
   "browser": {
-    "fs":false
+    "fs": false
   },
   "typings": "dist/index.d.ts",
   "sideEffects": false,
@@ -49,6 +49,7 @@
     "enzyme-adapter-react-16": "^1.7.0",
     "enzyme-to-json": "^3.3.4",
     "html-webpack-plugin": "^3.2.0",
+    "http-proxy-middleware": "^0.19.1",
     "jest": "^23.6.0",
     "react-docgen-typescript-loader": "^3.0.0",
     "react-docgen-typescript-webpack-plugin": "^1.1.0",
@@ -67,14 +68,14 @@
     "webpack-merge": "^4.1.4"
   },
   "dependencies": {
-
+    "ide-iframe": "^0.1.1"
   },
   "peerDependencies": {
     "ide-lib-utils": "0.x",
     "ide-lib-base-component": "0.x",
     "ette": "0.x",
     "ette-proxy": "0.x",
-    "ette-router": "0.x",    
+    "ette-router": "0.x",
     "styled-components": "4.x",
     "ide-code-editor": "x.x.x",
     "antd": "3.x",

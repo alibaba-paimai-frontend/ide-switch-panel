@@ -80,7 +80,7 @@ export type TSwitchPanelControlledKeys =
 
 // 定义被 store 控制的 model key 的列表，没法借用 ts 的能力动态从 TSwitchPanelControlledKeys 中获取
 export const CONTROLLED_KEYS: string[] = BASE_CONTROLLED_KEYS.concat([
-  'title'
+  'selectedPanelId', 'panels'
 ]);
 /**
  * SwitchPanel 对应的模型

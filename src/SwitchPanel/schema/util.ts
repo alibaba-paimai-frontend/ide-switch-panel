@@ -9,7 +9,7 @@ import {
   PanelModel,
   ISwitchPanelModel,
   SwitchPanelModel,
-  IStoresModel
+  DEFAULT_PROPS
 } from '../../index';
 import { IPanelModel } from './index';
 
@@ -17,16 +17,18 @@ import { IPanelModel } from './index';
  * 将普通对象转换成 Model
  * @param modelObject - 普通的对象
  */
-export function createModel(modelObject: IPanelProps = {}): ISwitchPanelModel {
-  invariant(!!modelObject, 'modelObject 对象不能为空');
+export function createModel(modelObject: IPanelProps = DEFAULT_PROPS): ISwitchPanelModel {
+  const mergedProps = Object.assign({}, DEFAULT_PROPS, modelObject);
 
-  if (!modelObject.panels) {
-    modelObject.panels = [];
+  if (!mergedProps.panels) {
+    mergedProps.panels = [];
   }
 
-  return SwitchPanelModel.create({
-    selectedPanelId: modelObject.selectedPanelId,
-    panels: modelObject.panels.map(panel => {
+  const { theme, styles } = mergedProps;
+
+  const model = SwitchPanelModel.create({
+    selectedPanelId: mergedProps.selectedPanelId,
+    panels: mergedProps.panels.map(panel => {
       invariant(!!panel.id, '[createModel] panel.id 不能为空');
       return PanelModel.create({
         id: panel.id,
@@ -34,6 +36,10 @@ export function createModel(modelObject: IPanelProps = {}): ISwitchPanelModel {
       });
     })
   });
+  model.setStyles(styles || {});
+  model.setTheme(theme);
+
+  return model;
 }
 
 /**

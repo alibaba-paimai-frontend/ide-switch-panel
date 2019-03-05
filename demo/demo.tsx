@@ -21,7 +21,12 @@ const props: ISwitchPanelProps = {
     {
       id: 'schema',
       title: 'Schema'
-    }
+    },
+    {
+      id: 'fns',
+      title: '回调函数'
+    },
+
   ],
   codeEditorEvent: {
     onChange: value => {

@@ -87,7 +87,7 @@ storiesOf('API - get', module)
 
           <SwitchPanelWithStore1
             onSwitch={onSwitch}
-            codeEditorEvent={codeEditorEvent}
+            codeEditor={codeEditorEvent}
           />
         </Col>
         <Col span={12}>
