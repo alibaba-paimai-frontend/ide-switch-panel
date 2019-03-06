@@ -10,7 +10,8 @@ import {
   findById,
   createPanel
 } from './util';
-import { IPanel } from '../index';
+import { IPanel, EPanelType } from '../index';
+import { STORES_SUBAPP } from './stores';
 
 // export enum ECodeLanguage {
 //   JSON = 'json',
@@ -27,12 +28,14 @@ export type TPanelControlledKeys =
 export const PANEL_CONTROLLED_KEYS: string[] = [
   'id',
   'title',
+  'type'
 ];
 
 export const PanelModel = types
   .model('PanelModel', {
     id: types.identifier,
-    title: types.optional(types.string, '')
+    title: types.optional(types.string, ''),
+    type: types.optional(types.string, ''),
     // language: types.optional(
     //   types.enumeration('Type', CODE_LANGUAGES),
     //   ECodeLanguage.JS
@@ -60,6 +63,9 @@ export const PanelModel = types
       },
       setTitle(title: string) {
         self.title = title;
+      },
+      setType(type: EPanelType) {
+        self.type = type;
       }
     };
   })
@@ -80,7 +86,7 @@ export type TSwitchPanelControlledKeys =
 
 // 定义被 store 控制的 model key 的列表，没法借用 ts 的能力动态从 TSwitchPanelControlledKeys 中获取
 export const CONTROLLED_KEYS: string[] = BASE_CONTROLLED_KEYS.concat([
-  'selectedPanelId', 'panels'
+  'selectedIndex', 'panels', 'width', 'height'
 ]);
 /**
  * SwitchPanel 对应的模型
@@ -88,11 +94,9 @@ export const CONTROLLED_KEYS: string[] = BASE_CONTROLLED_KEYS.concat([
 export const SwitchPanelModel = BaseModel
   .named('SwitchPanelModel')
   .props({
-    selectedPanelId: types.optional(types.string, ''),
-    // language: types.optional(
-    //   types.enumeration('Type', CODE_LANGUAGES),
-    //   ECodeLanguage.JS
-    // ),
+    height: types.optional(types.union(types.number, types.string), 'auto'),
+    width: types.optional(types.union(types.number, types.string), 'auto'),
+    selectedIndex: types.optional(types.number, 0),
     panels: types.array(types.late((): IAnyModelType => PanelModel)) // 在 mst v3 中， `types.array` 默认值就是 `[]`
     // 在 mst v3 中， `types.map` 默认值就是 `{}`
     //  ide 的 Options 可选值参考： https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.ieditorconstructionoptions.html
@@ -122,6 +126,12 @@ export const SwitchPanelModel = BaseModel
   })
   .actions(self => {
     return {
+      setHeight(h: number | string) {
+        self.height = h;
+      },
+      setWidth(w: number | string) {
+        self.width = w;
+      },
       setPanels(panels: IPanel[] | string = []) {
         if (typeof panels === 'string') {
           self.panels = JSON.parse(panels);
@@ -129,8 +139,8 @@ export const SwitchPanelModel = BaseModel
           self.panels = panels as any;
         }
       },
-      setSelectedPanelId(id?: string) {
-        self.selectedPanelId = id || '';
+      setselectedIndex(id?: number | string) {
+        self.selectedIndex = +id || 0;
       }
     };
   })

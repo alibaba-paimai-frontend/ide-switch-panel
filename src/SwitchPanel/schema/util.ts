@@ -27,12 +27,13 @@ export function createModel(modelObject: IPanelProps = DEFAULT_PROPS): ISwitchPa
   const { theme, styles } = mergedProps;
 
   const model = SwitchPanelModel.create({
-    selectedPanelId: mergedProps.selectedPanelId,
+    selectedIndex: +mergedProps.selectedIndex,
     panels: mergedProps.panels.map(panel => {
       invariant(!!panel.id, '[createModel] panel.id 不能为空');
       return PanelModel.create({
         id: panel.id,
-        title: panel.title
+        title: panel.title,
+        type: panel.type,
       });
     })
   });
@@ -51,9 +52,9 @@ export function createEmptyModel() {
 
 export function createPanel(panel: IPanel) : IPanelModel{
   invariant(isExist(panel.id), '创建 panel 必须要存在 id 属性');
-  const {id, title='untitle'} = panel;
+  const {id, title='untitle', type} = panel;
   return PanelModel.create({
-    id, title
+    id, title, type
   });
 }
 
@@ -81,13 +82,13 @@ export function findById(
     更新指定 enum 中的属性
 ----------------------------------------------------- */
 // 定义 panel 可更新信息的属性
-const PANEL_EDITABLE_ATTRIBUTE = ['id', 'title'];
+const PANEL_EDITABLE_ATTRIBUTE = ['id', 'title', 'type'];
 export const updatePanel = updateInScope(PANEL_EDITABLE_ATTRIBUTE);
 
 // 定义 panels 可更新信息的属性
-const EDITABLE_ATTRIBUTE = BASE_CONTROLLED_KEYS.concat(['selectedPanelId', 'panels']);
+const EDITABLE_ATTRIBUTE = BASE_CONTROLLED_KEYS.concat(['selectedIndex', 'panels', 'width', 'height', 'buttonHeight']);
 export const updateModelAttribute = updateInScope(EDITABLE_ATTRIBUTE);
 
 // 定义 switch panel 可更新信息的属性
-const STORES_EDITABLE_ATTRIBUTE = ['height'];
+const STORES_EDITABLE_ATTRIBUTE: string[] = [];
 export const updateStoresAttribute = updateInScope(STORES_EDITABLE_ATTRIBUTE);

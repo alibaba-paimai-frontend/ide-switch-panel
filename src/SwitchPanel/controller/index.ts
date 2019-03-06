@@ -29,6 +29,10 @@ export const AppFactory = function (stores: IStoresModel, innerApps?: Record<str
     {
       name: ESubApps.codeEditor,
       targets: ['editor']
+    },
+    {
+      name: ESubApps.previewer,
+      targets: ['iframe']
     }
   ]);
 

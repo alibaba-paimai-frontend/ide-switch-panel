@@ -44,7 +44,7 @@ router.put('panels', '/panels/selection/:id', function(ctx: IContext) {
   const { id } = params;
 
   // stores.setSchema(createSchemaModel(schema));
-  stores.model.setSelectedPanelId(id);
+  stores.model.setselectedIndex(id);
 
   ctx.response.status = 200;
 });

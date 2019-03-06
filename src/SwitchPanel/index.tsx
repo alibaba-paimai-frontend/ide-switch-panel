@@ -1,4 +1,4 @@
-import React, { Component, useCallback } from 'react';
+import React, { Component, useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'antd';
 import { pick } from 'ide-lib-utils';
@@ -12,31 +12,44 @@ import {
   TCodeEditorControlledKeys
 } from 'ide-code-editor';
 
+import { IFrame, IIFrameProps, TIFrameControlledKeys, IStoresModel as IIFrameStoresModel, IFrameAddStore} from 'ide-iframe';
+
 import { StoresFactory, IStoresModel } from './schema/stores';
 import { TSwitchPanelControlledKeys, CONTROLLED_KEYS } from './schema/index';
 import { AppFactory } from './controller/index';
 import { debugInteract, debugRender } from '../lib/debug';
-import { StyledContainer, StyledButtonGroup } from './styles';
+import { StyledContainer, StyledButtonGroup, StyledPanelWrap } from './styles';
+import { switchPanel} from './solution'
 
 
 type OptionalCodeEditorProps = OptionalProps<
   ICodeEditorProps,
   TCodeEditorControlledKeys
 >;
+type OptionalIFrameProps = OptionalProps<IIFrameProps, TIFrameControlledKeys>;
+
 interface ISubComponents {
   CodeEditorComponent: React.ComponentType<OptionalCodeEditorProps>;
+  IFrameComponent: React.ComponentType<OptionalIFrameProps>;
+}
+
+// 不同面板对应的类型，目前只有 编辑器 和 iframe 两种
+export enum EPanelType {
+  editor = 'editor',
+  iframe = 'iframe'
 }
 
 export interface IPanel {
   id: string;
   title?: string;
+  type: EPanelType; // 面板类型
 }
 
 export interface IPanelEvent {
   /**
    * 点击回调函数
    */
-  onSwitch?: (panel: IPanel, index: number) => void;
+  onSwitch?: (panel: IPanel, index: number) => () => void;
 }
 
 export interface IPanelProps extends IPanelEvent {
@@ -56,7 +69,23 @@ export interface IPanelProps extends IPanelEvent {
    * @type {string}
    * @memberof ISwitchPanelProps
    */
-  selectedPanelId?: string;
+  selectedIndex?: number | string;
+
+  /**
+   * 容器的宽度
+   *
+   * @type {(number | string)}
+   * @memberof ISwitchPanelProps
+   */
+  width?: number | string;
+
+  /**
+   * 按钮的高度
+   *
+   * @type {(number | string)}
+   * @memberof ISwitchPanelProps
+   */
+  buttonHeight?: number | string;
 }
 
 
@@ -75,34 +104,42 @@ export interface ISwitchPanelProps extends ISwitchPanelEvent, IPanelProps, IBase
    */
   codeEditor?: OptionalCodeEditorProps;
 
+
   /**
-   * 容器的宽度或高度
+  * iframe 预览组件
+  *
+  * @type {OptionalIFrameProps}
+  * @memberof ISwitchPanelProps
+  */
+  previewer?: OptionalIFrameProps;
+
+  /**
+   * 容器的高度
    *
    * @type {(number | string)}
    * @memberof ISwitchPanelProps
    */
   height?: number | string;
+
 }
 
 
 export const Panels = observer((props: IPanelProps) => {
-  const onSwitchPanel = useCallback((panel: IPanel, index: number) => () => {
-    props.onSwitch && props.onSwitch(panel, index);
-  }, []);
 
-  const { panels = [], selectedPanelId } = props;
+  const { panels = [], selectedIndex, onSwitch, width, buttonHeight = 30 } = props;
   return (
     (panels.length && (
-      <StyledButtonGroup>
+      <StyledButtonGroup width={width}>
         {panels.map((panel, i) => {
-          const { title, id } = panel;
+          const { title } = panel;
           return (
             <Button
-              type={selectedPanelId === id ? 'primary' : 'default'}
-              onClick={onSwitchPanel(panel, i)}
+              type={selectedIndex === i ? 'primary' : 'default'}
+              onClick={onSwitch(panel, i)}
               style={{
                 flex: '1',
-                height: '30px'
+                borderRadius: 0,
+                height: buttonHeight
               }}
               size={'large'}
               key={'' + i}
@@ -119,9 +156,26 @@ export const Panels = observer((props: IPanelProps) => {
 
 
 export const DEFAULT_PROPS: ISwitchPanelProps = {
-  codeEditor: {
-    width: 800
-  },
+  selectedIndex: 0,
+  buttonHeight: 30,
+  panels: [
+    {
+      id: 'preview',
+      title: '页面预览',
+      type: EPanelType.iframe
+    },
+    {
+      id: 'schema',
+      title: 'Schema',
+      type: EPanelType.editor
+    },
+    {
+      id: 'fns',
+      title: '回调函数',
+      type: EPanelType.editor
+    },
+  ],
+  width: '100%',
   theme: {
     main: '#25ab68'
   },
@@ -132,26 +186,53 @@ export const DEFAULT_PROPS: ISwitchPanelProps = {
 
 export const SwitchPanelHOC = (subComponents: ISubComponents) => {
   const SwitchPanelHOC = (props: ISwitchPanelProps = DEFAULT_PROPS) => {
-    const { CodeEditorComponent } = subComponents;
+    const { CodeEditorComponent, IFrameComponent } = subComponents;
     const mergedProps = Object.assign({}, DEFAULT_PROPS, props);
-    const { codeEditor, styles, panels,
-      selectedPanelId,
-      height,
-      onSwitch } = mergedProps;
+    const { codeEditor, previewer, styles, panels,
+      selectedIndex,
+      height, width, buttonHeight } = mergedProps;
+
+    // 需要同步更新子元素的宽度
+    codeEditor.width = width;
+    codeEditor.height = height;
+    codeEditor.visible = true;
+
+    previewer.styles = previewer.styles || {};
+    previewer.styles.container = Object.assign({}, previewer.styles.container || {}, {width, height});
+
+    const [pIndex, setPIndex] = useState(selectedIndex);
+
+    const onSwitchPanel = useCallback((panel: IPanel, index: number) => () => {
+      if(index === pIndex) return;
+      setPIndex(index);
+      props.onSwitch && props.onSwitch(panel, index);
+    }, [props.onSwitch, pIndex]);
+
+    // 根据当前的选择的配置项，获取其中的 props ，然后 merge 过来，自定义配置的优先级最高
+    const selectedPanel = panels[+pIndex];
 
     return (
       <StyledContainer
         style={styles.container}
         height={height}
-        width={codeEditor.width}
+        buttonHeight={buttonHeight}
+        width={width}
         // ref={this.root}
         className="ide-switch-panel-container"
       >
-        <CodeEditorComponent {...codeEditor} />
+        <StyledPanelWrap visible={selectedPanel.type === EPanelType.iframe}>
+          <IFrameComponent {...previewer}/>
+        </StyledPanelWrap>
+
+        <StyledPanelWrap visible={selectedPanel.type === EPanelType.editor}>
+          <CodeEditorComponent {...codeEditor} />
+        </StyledPanelWrap>
         <Panels
           panels={panels}
-          selectedPanelId={selectedPanelId}
-          onSwitch={onSwitch}
+          width={width}
+          buttonHeight={buttonHeight}
+          selectedIndex={pIndex}
+          onSwitch={onSwitchPanel}
         />
       </StyledContainer>
     );
@@ -162,7 +243,8 @@ export const SwitchPanelHOC = (subComponents: ISubComponents) => {
 
 // 采用高阶组件方式生成普通的 SwitchPanel 组件
 export const SwitchPanel = SwitchPanelHOC({
-  CodeEditorComponent: CodeEditor
+  CodeEditorComponent: CodeEditor,
+  IFrameComponent: IFrame
 });
 
 /* ----------------------------------------------------
@@ -177,11 +259,13 @@ export const SwitchPanelAddStore = (storesEnv: IStoresEnv<IStoresModel>) => {
   const { stores } = storesEnv;
   const SwitchPanelHasSubStore = SwitchPanelHOC({
     // @ts-ignore
-    CodeEditorComponent: CodeEditorAddStore(extracSubEnv<IStoresModel, ICodeEditorStoresModel>(storesEnv, 'codeEditor'))  
+    CodeEditorComponent: CodeEditorAddStore(extracSubEnv<IStoresModel, ICodeEditorStoresModel>(storesEnv, 'codeEditor')),
+    // @ts-ignore
+    IFrameComponent: IFrameAddStore(extracSubEnv<IStoresModel, IIFrameStoresModel>(storesEnv, 'previewer'))
   });
 
   const SwitchPanelWithStore = (props: Omit<ISwitchPanelProps, TSwitchPanelControlledKeys>) => {
-  const { codeEditor,...otherProps } = props;
+  const { codeEditor = {}, previewer = {}, ...otherProps } = props;
   const { model } = stores;
   const controlledProps = pick(model, CONTROLLED_KEYS);
   debugRender(`[${stores.id}] rendering`);
@@ -189,14 +273,18 @@ export const SwitchPanelAddStore = (storesEnv: IStoresEnv<IStoresModel>) => {
   const codeEditorWithInjected = useIndectedEvents<ICodeEditorProps, IStoresModel>(storesEnv, codeEditor, {
     'onChange': []
   });
+  const previewerWithInjected = useIndectedEvents<IIFrameProps, IStoresModel>(storesEnv, previewer, {
+    'handleFrameTasks': []
+  });
 
     const otherPropsWithInjected = useIndectedEvents<ISwitchPanelProps, IStoresModel>(storesEnv, otherProps, {
-    'onSwitch': []
+      'onSwitch': [switchPanel]
   });
 
   return (
       <SwitchPanelHasSubStore
       codeEditor={codeEditorWithInjected }
+      previewer={previewerWithInjected}
       {...controlledProps }
       {...otherPropsWithInjected }
       />

@@ -8,10 +8,16 @@ import {
   CodeEditorFactory
 } from 'ide-code-editor';
 
+import {
+  Stores as IFramerStores,
+  IFrameFactory
+} from 'ide-iframe';
+
 export const STORE_ID_PREIX = 'ssp_';
 
 export enum ESubApps {
-  codeEditor = 'codeEditor'
+  codeEditor = 'codeEditor',
+  previewer = 'previewer'
 };
 
 export const NAMES_SUBAPP = Object.values(ESubApps);
@@ -19,12 +25,14 @@ export const NAMES_SUBAPP = Object.values(ESubApps);
 // 定义子 stores 映射关系
 export const STORES_SUBAPP: Record<ESubApps, TAnyMSTModel> = {
   codeEditor: CodeEditorStores,
+  previewer: IFramerStores
 };
 
 // 定义子 facotry 映射关系
-export const FACTORY_SUBAPP: Record<ESubApps, (...args: any[]) => Partial<IStoresEnv<TAnyMSTModel>>> = {
-  codeEditor: CodeEditorFactory
-}
+export const FACTORY_SUBAPP: Record<ESubApps, (...args: any[]) => IStoresEnv<TAnyMSTModel>> = {
+  codeEditor: CodeEditorFactory,
+  previewer: IFrameFactory
+};
 
 export const Stores = types
   .model('StoresModel', {
@@ -33,8 +41,7 @@ export const Stores = types
       identifier => identifier.indexOf(STORE_ID_PREIX) === 0
     ),
     ...STORES_SUBAPP,
-    model: SwitchPanelModel,
-    height: types.optional(types.union(types.number, types.string), 'auto')
+    model: SwitchPanelModel
   })
   .actions(self => {
     const assignerInjected = getSubStoresAssigner(self, NAMES_SUBAPP);
@@ -42,10 +49,7 @@ export const Stores = types
       setModel(model: SnapshotOrInstance<typeof self.model>) {
         self.model = cast(model);
       },
-      ...assignerInjected,
-      setHeight(h: number | string) {
-        self.height = h;
-      }
+      ...assignerInjected
     };
   })
   .actions(self => {
