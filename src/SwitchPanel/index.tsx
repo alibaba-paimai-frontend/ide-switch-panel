@@ -19,7 +19,7 @@ import { TSwitchPanelControlledKeys, CONTROLLED_KEYS } from './schema/index';
 import { AppFactory } from './controller/index';
 import { debugInteract, debugRender } from '../lib/debug';
 import { StyledContainer, StyledButtonGroup, StyledPanelWrap } from './styles';
-import { switchPanel} from './solution'
+import { switchPanel } from './solution/index';
 
 
 type OptionalCodeEditorProps = OptionalProps<
@@ -188,7 +188,7 @@ export const SwitchPanelHOC = (subComponents: ISubComponents) => {
   const SwitchPanelHOC = (props: ISwitchPanelProps = DEFAULT_PROPS) => {
     const { CodeEditorComponent, IFrameComponent } = subComponents;
     const mergedProps = Object.assign({}, DEFAULT_PROPS, props);
-    const { codeEditor, previewer, styles, panels,
+    const { codeEditor = {}, previewer = {}, styles, panels,
       selectedIndex,
       height, width, buttonHeight } = mergedProps;
 
@@ -201,6 +201,10 @@ export const SwitchPanelHOC = (subComponents: ISubComponents) => {
     previewer.styles.container = Object.assign({}, previewer.styles.container || {}, {width, height});
 
     const [pIndex, setPIndex] = useState(selectedIndex);
+
+    useEffect(()=>{
+      setPIndex(props.selectedIndex);
+    }, [props.selectedIndex])
 
     const onSwitchPanel = useCallback((panel: IPanel, index: number) => () => {
       if(index === pIndex) return;

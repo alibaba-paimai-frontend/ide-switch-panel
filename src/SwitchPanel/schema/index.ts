@@ -106,7 +106,7 @@ export const SwitchPanelModel = BaseModel
       /**
        * 只返回当前模型的属性，可以通过 filter 字符串进行属性项过滤
        */
-      allAttibuteWithFilter(filterArray?: string | string[]) {
+      allAttibuteWithFilter(filterArray: string | string[] = CONTROLLED_KEYS) {
         if (!filterArray) return self;
         const filters = [].concat(filterArray || []);
         return pick(self, filters);
@@ -139,7 +139,7 @@ export const SwitchPanelModel = BaseModel
           self.panels = panels as any;
         }
       },
-      setselectedIndex(id?: number | string) {
+      setSelectedIndex(id?: number | string) {
         self.selectedIndex = +id || 0;
       }
     };

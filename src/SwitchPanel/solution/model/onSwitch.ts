@@ -8,6 +8,9 @@ import { IPanel } from '../../index';
  * 显示 list 列表项
  * @param env - IStoresEnv
  */
-export const switchPanel = (env: IStoresEnv<IStoresModel>) => (panel: IPanel, index: number) => {
-    const { stores, client } = env;
+export function switchPanel(env: IStoresEnv<IStoresModel>){
+    return (panel: IPanel, index: number) => {
+        const { stores, client } = env;
+        stores.model.setSelectedIndex(index);
+    }
 }

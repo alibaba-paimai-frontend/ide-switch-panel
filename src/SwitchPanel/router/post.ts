@@ -1,5 +1,7 @@
 import Router from 'ette-router';
 import { isExist } from 'ide-lib-utils';
+import { buildNormalResponse } from 'ide-lib-base-component';
+
 
 import { IContext } from './helper';
 import { createModel } from '../schema/util';
@@ -7,16 +9,17 @@ import { createModel } from '../schema/util';
 export const router = new Router();
 
 // 创新新的 panels
-router.post('panels', '/panels', function(ctx: IContext) {
+router.post('createSwitchPanel', '/panels', function(ctx: IContext) {
   const { stores, request } = ctx;
-  const { panels } = request.data;
+  const { schema } = request.data;
 
-  stores.setModel(createModel({ panels }));
-  ctx.response.status = 200;
+  stores.setModel(createModel(schema));
+
+  buildNormalResponse(ctx, 200, {success: true});
 });
 
 // 在指定 index 处新增 panel
-router.post('panels', '/panels/indexes/:index', function(ctx: IContext) {
+router.post('addPanelAtIndex', '/panels/indexes/:index', function(ctx: IContext) {
   const { stores, params, request } = ctx;
   const { index } = params;
   const { panel } = request.data;
@@ -29,10 +32,6 @@ router.post('panels', '/panels/indexes/:index', function(ctx: IContext) {
   }
   const success = stores.model.addPanel(targetIndex, panel);
 
-  ctx.response.body = {
-    success,
-    targetIndex
-  };
+  buildNormalResponse(ctx, 200, { success, targetIndex }, `panel(id: ${panel.id}) 新增: ${success}`);
 
-  ctx.response.status = 200;
 });

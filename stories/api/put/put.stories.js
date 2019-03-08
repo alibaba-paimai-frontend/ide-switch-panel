@@ -5,7 +5,7 @@ import { wInfo } from '../../../.storybook/utils';
 import mdPut from './put.md';
 
 import { SwitchPanelFactory } from '../../../src';
-import { modelPropsGen } from '../../helper';
+import { modelPropsGen, getRandomUrl } from '../../helper';
 
 const { SwitchPanelWithStore, client } = SwitchPanelFactory();
 
@@ -41,15 +41,15 @@ function onSwitch(panel, index) {
 let selectedAttrName = '';
 
 const createNew = client => () => {
-  const { panels } = modelPropsGen();
-  client.post('/panels', { panels: panels });
-  client.put('/clients/editor', {
-    name: 'width',
-    value: 300 + Math.random() * 100
+  const schema = modelPropsGen();
+  client.post('/panels', { schema });
+  client.put('/clients/codeEditor/editor', {
+    name: 'value',
+    value: 'new createeeeee'
   });
-  client.put('/panels', {
-    name: 'height',
-    value: 250 + Math.random() * 100
+  client.put('/clients/previewer/iframe', {
+    name: 'url',
+    value: getRandomUrl()
   });
 };
 
@@ -71,7 +71,7 @@ function updateById() {
 
   const value = document.getElementById('targeValue').value;
 
-  // 选中那个节点
+  // 选中那个 panel
   client.put(`/panels/selection/${id}`);
 
   // 更新节点属性，返回更新后的数值
@@ -80,11 +80,11 @@ function updateById() {
     .then(res => {
       const { status, body } = res;
       if (status === 200) {
-        const isSuccess = body.success;
+        const isSuccess = body.data.success;
         client.get(`/panels/${id}`).then(res => {
           const { status, body } = res;
           if (status === 200) {
-            const panel = body.panel || {};
+            const panel = body.data.panel || {};
             document.getElementById('info').innerText =
               `更新操作：${isSuccess}; \n` +
               JSON.stringify(panel.toJSON ? panel.toJSON() : panel, null, 4);
@@ -126,6 +126,10 @@ storiesOf('API - put', module)
               <Button onClick={createNew(client)}>随机创建</Button>
             </Col>
           </Row>
+
+          <br/>
+          <br/>
+          <br/>
 
           <SwitchPanelWithStore
             onSwitch={onSwitch}

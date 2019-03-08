@@ -8,20 +8,22 @@ import mdPlain from './simple-plain.md';
 
 const codeEditor = {
   value: '',
-  width: 600,
-  height: 400
 };
 
 const propsNormal = {
-  selectedPanelId: 'schema',
+  selectedIndex: 0,
+  width: 400,
+  height: 200,
   panels: [
     {
       id: 'preview',
-      title: '页面预览'
+      title: '页面预览',
+      type: 'iframe'
     },
     {
       id: 'schema',
-      title: 'Schema'
+      title: 'Schema',
+      type: 'editor'
     }
   ]
 };
@@ -39,10 +41,10 @@ function onSwitch(panel, index) {
 }
 
 const clickBtn = target => () => {
-  if (target && target.setSelectedPanelId) {
-    target.setSelectedPanelId('preview');
+  if (target && target.setSelectedIndex) {
+    target.setSelectedIndex(1);
   } else {
-    target.selectedPanelId = 'preview';
+    target.selectedIndex = 1;
   }
 };
 
@@ -52,6 +54,11 @@ storiesOf('基础使用', module)
     const SwitchPanelWithStore = SwitchPanelAddStore({
       stores: {
         model: propsModel,
+        previewer: {
+          model: {
+            url: '//www.baidu.com'
+          }
+        },
         codeEditor:{
           model: codeEditor
         }
@@ -79,7 +86,7 @@ storiesOf('基础使用', module)
       </button>
       <SwitchPanel
         {...propsNormal}
-        onEditor={{
+        codeEditor={{
           ...codeEditor,
           onChange: codeEditorEvent.onChange
         }}

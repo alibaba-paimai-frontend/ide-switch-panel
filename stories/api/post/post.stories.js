@@ -5,7 +5,7 @@ import { wInfo } from '../../../.storybook/utils';
 import mdPost from './post.md';
 
 import { SwitchPanelFactory } from '../../../src';
-import { modelPropsGen, panelGen } from '../../helper';
+import { modelPropsGen, panelGen, getRandomUrl } from '../../helper';
 
 const { SwitchPanelWithStore, client } = SwitchPanelFactory();
 
@@ -38,15 +38,15 @@ function onSwitch(panel, index) {
 }
 
 const createNew = client => () => {
-  const { panels } = modelPropsGen();
-  client.post('/panels', { panels: panels });
-  client.put('/clients/editor', {
-    name: 'width',
-    value: 300 + Math.random() * 100
+  const schema = modelPropsGen();
+  client.post('/panels', { schema });
+  client.put('/clients/codeEditor/editor', {
+    name: 'value',
+    value: 'new createeeeee'
   });
-  client.put('/panels', {
-    name: 'height',
-    value: 250 + Math.random() * 100
+  client.put('/clients/previewer/iframe', {
+    name: 'url',
+    value: getRandomUrl()
   });
 };
 
@@ -64,7 +64,7 @@ function addNewPanel() {
       const { status, body } = res;
       const { success, targetIndex } = body;
       if (status === 200 && success) {
-        const targetIndex = body.targetIndex;
+        const targetIndex = body.data.targetIndex;
         document.getElementById('info').innerText =
           `在 index ${targetIndex} 处新增 panel: \n`;
       }
@@ -90,6 +90,11 @@ storiesOf('API - post', module)
               <Button onClick={createNew(client)}>随机创建</Button>
             </Col>
           </Row>
+
+          <br/>
+          <br/>
+          <br/>
+          <br/>
 
           <SwitchPanelWithStore
             onSwitch={onSwitch}

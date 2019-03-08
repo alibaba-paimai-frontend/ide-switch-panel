@@ -28,6 +28,8 @@ export function createModel(modelObject: IPanelProps = DEFAULT_PROPS): ISwitchPa
 
   const model = SwitchPanelModel.create({
     selectedIndex: +mergedProps.selectedIndex,
+    width: mergedProps.width,
+    height: mergedProps.height,
     panels: mergedProps.panels.map(panel => {
       invariant(!!panel.id, '[createModel] panel.id 不能为空');
       return PanelModel.create({

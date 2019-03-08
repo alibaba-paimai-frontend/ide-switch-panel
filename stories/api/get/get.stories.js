@@ -5,7 +5,7 @@ import { wInfo } from '../../../.storybook/utils';
 import mdGet from './get.md';
 
 import { SwitchPanelFactory } from '../../../src';
-import { modelPropsGen } from '../../helper';
+import { modelPropsGen, getRandomUrl } from '../../helper';
 
 const {
   SwitchPanelWithStore: SwitchPanelWithStore1,
@@ -33,7 +33,7 @@ const codeEditorEvent = {
 function onSwitch(panel, index) {
   console.log('当前值：', panel, index);
 
-  client1.get(`/clients/editor`).then(res => {
+  client1.get(`/clients/codeEditor/editor`).then(res => {
     const { status, body } = res;
     if (status === 200) {
       const config = body.config;
@@ -53,7 +53,7 @@ const getInfo = (client, filter) => () => {
   client.get(`/panels?${query}`).then(res => {
     const { status, body } = res;
     if (status === 200) {
-      attributes = body.attributes;
+      attributes = body.data.attributes;
     }
 
     document.getElementById('info').innerText = JSON.stringify(
@@ -65,11 +65,15 @@ const getInfo = (client, filter) => () => {
 };
 
 const createNew = client => () => {
-  const { panels } = modelPropsGen();
-  client.post('/panels', { panels: panels });
-  client.put('/clients/editor', {
-    name: 'width',
-    value: 300 + Math.random() * 100
+  const schema = modelPropsGen();
+  client.post('/panels', { schema });
+  client.put('/clients/codeEditor/editor', {
+    name: 'value',
+    value: 'new createeeeee'
+  });
+  client.put('/clients/previewer/iframe', {
+    name: 'url',
+    value: getRandomUrl()
   });
 };
 
@@ -80,11 +84,13 @@ storiesOf('API - get', module)
       <Row style={styles.demoWrap}>
         <Col span={10} offset={2}>
           <Button onClick={getInfo(client1)}>获取信息</Button>
-          <Button onClick={getInfo(client1, ['selectedPanelId'])}>
+          <Button onClick={getInfo(client1, ['selectedIndex'])}>
             获取指定信息(selectedPanelId)
           </Button>
           <Button onClick={createNew(client1)}>随机创建</Button>
-
+          <br/>
+          <br/>
+          <br/>
           <SwitchPanelWithStore1
             onSwitch={onSwitch}
             codeEditor={codeEditorEvent}
