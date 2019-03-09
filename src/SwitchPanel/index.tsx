@@ -185,7 +185,7 @@ export const DEFAULT_PROPS: ISwitchPanelProps = {
 };
 
 export const SwitchPanelHOC: (subComponents: ISubComponents) => React.FunctionComponent<ISwitchPanelProps> = (subComponents) => {
-  const SwitchPanelHOC = (props: ISwitchPanelProps = DEFAULT_PROPS) => {
+  const SwitchPanelHOC = (props: ISwitchPanelProps) => {
     const { CodeEditorComponent, IFrameComponent } = subComponents;
     const mergedProps = Object.assign({}, DEFAULT_PROPS, props);
     const { codeEditor = {}, previewer = {}, styles, panels,
@@ -242,7 +242,7 @@ export const SwitchPanelHOC: (subComponents: ISubComponents) => React.FunctionCo
     );
   };
   SwitchPanelHOC.displayName = 'SwitchPanelHOC';
-  return observer(based(SwitchPanelHOC));
+  return observer(based(SwitchPanelHOC, DEFAULT_PROPS));
 };
 
 // 采用高阶组件方式生成普通的 SwitchPanel 组件
