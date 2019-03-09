@@ -124,7 +124,7 @@ export interface ISwitchPanelProps extends ISwitchPanelEvent, IPanelProps, IBase
 }
 
 
-export const Panels = observer((props: IPanelProps) => {
+export const Panels: React.FunctionComponent<IPanelProps> = observer((props) => {
 
   const { panels = [], selectedIndex, onSwitch, width, buttonHeight = 30 } = props;
   return (
@@ -184,7 +184,7 @@ export const DEFAULT_PROPS: ISwitchPanelProps = {
   }
 };
 
-export const SwitchPanelHOC = (subComponents: ISubComponents) => {
+export const SwitchPanelHOC: (subComponents: ISubComponents) => React.FunctionComponent<ISwitchPanelProps> = (subComponents) => {
   const SwitchPanelHOC = (props: ISwitchPanelProps = DEFAULT_PROPS) => {
     const { CodeEditorComponent, IFrameComponent } = subComponents;
     const mergedProps = Object.assign({}, DEFAULT_PROPS, props);
@@ -259,7 +259,7 @@ export const SwitchPanel = SwitchPanelHOC({
  * 科里化创建 SwitchPanelWithStore 组件
  * @param stores - store 模型实例
  */
-export const SwitchPanelAddStore = (storesEnv: IStoresEnv<IStoresModel>) => {
+export const SwitchPanelAddStore: (storesEnv: IStoresEnv<IStoresModel>) => React.FunctionComponent<ISwitchPanelProps> = (storesEnv) => {
   const { stores } = storesEnv;
   const SwitchPanelHasSubStore = SwitchPanelHOC({
     // @ts-ignore
