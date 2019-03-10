@@ -61,7 +61,7 @@ export function createPanel(panel: IPanel) : IPanelModel{
 }
 
 export function findById(
-  model: ISwitchPanelModel | ISwitchPanelProps,
+  model: ISwitchPanelProps,
   id: string,
   filterArray?: string | string[]
 ): IPanelModel | IPanelProps | null {

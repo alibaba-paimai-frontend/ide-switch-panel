@@ -1,7 +1,7 @@
 import { cast, types, Instance, SnapshotOrInstance } from 'mobx-state-tree';
 import {TAnyMSTModel, getSubStoresAssigner, IStoresEnv, getSubAppsFromFactoryMap } from 'ide-lib-base-component';
 
-import { SwitchPanelModel, ISwitchPanelModel } from './index';
+import { SwitchPanelModel } from './index';
 import { createEmptyModel, updateStoresAttribute } from './util';
 import {
   Stores as CodeEditorStores,

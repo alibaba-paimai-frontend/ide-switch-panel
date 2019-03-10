@@ -1,7 +1,6 @@
-import { types, Instance, IAnyModelType, destroy, SnapshotOrInstance } from 'mobx-state-tree';
+import { types, Instance, IAnyModelType, destroy, cast, SnapshotOrInstance } from 'mobx-state-tree';
 import { pick } from 'ide-lib-utils';
-import { BaseModel, TBaseControlledKeys, BASE_CONTROLLED_KEYS } from 'ide-lib-base-component';
-
+import { BaseModel, IBaseModel, TBaseControlledKeys, BASE_CONTROLLED_KEYS, stringLiterals, ElementType } from 'ide-lib-base-component';
 
 import { debugModel } from '../../lib/debug';
 import {
@@ -11,7 +10,6 @@ import {
   createPanel
 } from './util';
 import { IPanel, EPanelType } from '../index';
-import { STORES_SUBAPP } from './stores';
 
 // export enum ECodeLanguage {
 //   JSON = 'json',
@@ -24,7 +22,6 @@ import { STORES_SUBAPP } from './stores';
 export type TPanelControlledKeys =
   keyof SnapshotOrInstance<typeof PanelModel>;
 
-// 定义被 store 控制的 model key 的列表，没法借用 ts 的能力动态从 TSwitchPanelControlledKeys 中获取
 export const PANEL_CONTROLLED_KEYS: string[] = [
   'id',
   'title',
@@ -80,18 +77,23 @@ export const PanelModel = types
 export interface IPanelModel extends Instance<typeof PanelModel> {}
 
 
-// 获取被 store 控制的 model key 的列表
-export type TSwitchPanelControlledKeys =
-  keyof SnapshotOrInstance<typeof SwitchPanelModel> | TBaseControlledKeys;
+const SELF_CONTROLLED_KEYS = stringLiterals('selectedIndex', 'panels', 'width', 'height');
+export const CONTROLLED_KEYS = BASE_CONTROLLED_KEYS.concat(SELF_CONTROLLED_KEYS);
 
-// 定义被 store 控制的 model key 的列表，没法借用 ts 的能力动态从 TSwitchPanelControlledKeys 中获取
-export const CONTROLLED_KEYS: string[] = BASE_CONTROLLED_KEYS.concat([
-  'selectedIndex', 'panels', 'width', 'height'
-]);
+// 获取被 store 控制的 model key 的列表，
+// note: 由于 使用 BaseModel 继承获得，用 awesome-typescript-load 解析不出来，只能自己定义了
+export type TSwitchPanelControlledKeys = ElementType<typeof SELF_CONTROLLED_KEYS> | TBaseControlledKeys;
+
+
+/**
+ * 这里的 IAnyModelType 声明是特意的 hack
+ * 当模型类型从 BaseModel 导出时，TS 类型推断出错，导致无法生成 schema/index.d.ts 和 schema/stores.d.ts
+ * 所以特意将其隔离出来，希望以后找到方法来规避
+ */
 /**
  * SwitchPanel 对应的模型
  */
-export const SwitchPanelModel = BaseModel
+export const SwitchPanelModel: IAnyModelType = BaseModel
   .named('SwitchPanelModel')
   .props({
     height: types.optional(types.union(types.number, types.string), 'auto'),
@@ -132,11 +134,11 @@ export const SwitchPanelModel = BaseModel
       setWidth(w: number | string) {
         self.width = w;
       },
-      setPanels(panels: IPanel[] | string = []) {
+      setPanels(panels: SnapshotOrInstance<typeof self.panels> | string = []) {
         if (typeof panels === 'string') {
           self.panels = JSON.parse(panels);
         } else {
-          self.panels = panels as any;
+          self.panels = cast(panels);
         }
       },
       setSelectedIndex(id?: number | string) {
