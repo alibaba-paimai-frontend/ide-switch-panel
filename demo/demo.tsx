@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { render } from 'react-dom';
-import { SwitchPanel, ISwitchPanelProps, SwitchPanelFactory } from '../src/';
+import { SwitchPanel, ISwitchPanelProps, SwitchPanelFactory, IPanel } from '../src/';
 
 
 
-function onSwitch(panel, index) {
+function onSwitch(panel: IPanel, index: number) {
   console.log('当前点击：', panel, index);
 }
 
@@ -33,7 +33,7 @@ const {
 } = SwitchPanelFactory();
 
 
-function onSwitchWithClient(panel, index) {
+function onSwitchWithClient(panel: IPanel, index: number) {
   console.log('[with client]当前点击：', panel, index);
   client.put('/clients/codeEditor/editor', { name: 'value', value: `${index}: panel name: ${panel.id}` });
 }
