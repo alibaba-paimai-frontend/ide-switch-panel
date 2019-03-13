@@ -2,7 +2,7 @@ import React, { Component, useCallback, useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Button } from 'antd';
 import { pick } from 'ide-lib-utils';
-import { based, Omit, OptionalProps, IBaseTheme, IBaseComponentProps, IStoresEnv, useIndectedEvents, extracSubEnv } from 'ide-lib-base-component';
+import { based, Omit, OptionalProps, IBaseTheme, IBaseComponentProps, IStoresEnv, useInjectedEvents, extracSubEnv } from 'ide-lib-base-component';
 
 import {
   CodeEditor,
@@ -274,14 +274,14 @@ export const SwitchPanelAddStore: (storesEnv: IStoresEnv<IStoresModel>) => React
   const controlledProps = pick(model, CONTROLLED_KEYS);
   debugRender(`[${stores.id}] rendering`);
 
-  const codeEditorWithInjected = useIndectedEvents<ICodeEditorProps, IStoresModel>(storesEnv, codeEditor, {
+  const codeEditorWithInjected = useInjectedEvents<ICodeEditorProps, IStoresModel>(storesEnv, codeEditor, {
     'onChange': []
   });
-  const previewerWithInjected = useIndectedEvents<IIFrameProps, IStoresModel>(storesEnv, previewer, {
+  const previewerWithInjected = useInjectedEvents<IIFrameProps, IStoresModel>(storesEnv, previewer, {
     'handleFrameTasks': []
   });
 
-    const otherPropsWithInjected = useIndectedEvents<ISwitchPanelProps, IStoresModel>(storesEnv, otherProps, {
+    const otherPropsWithInjected = useInjectedEvents<ISwitchPanelProps, IStoresModel>(storesEnv, otherProps, {
       'onSwitch': [switchPanel]
   });
 

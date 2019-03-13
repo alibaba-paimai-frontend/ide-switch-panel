@@ -28,7 +28,7 @@ export const PANEL_CONTROLLED_KEYS: string[] = [
   'type'
 ];
 
-export const PanelModel = types
+export const PanelModel: IAnyModelType = types
   .model('PanelModel', {
     id: types.identifier,
     title: types.optional(types.string, ''),

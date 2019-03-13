@@ -1,4 +1,4 @@
-import { cast, types, Instance, SnapshotOrInstance } from 'mobx-state-tree';
+import { cast, types, Instance, SnapshotOrInstance, IAnyModelType } from 'mobx-state-tree';
 import {TAnyMSTModel, getSubStoresAssigner, IStoresEnv, getSubAppsFromFactoryMap } from 'ide-lib-base-component';
 
 import { SwitchPanelModel } from './index';
@@ -34,7 +34,7 @@ export const FACTORY_SUBAPP: Record<ESubApps, (...args: any[]) => IStoresEnv<TAn
   previewer: IFrameFactory
 };
 
-export const Stores = types
+export const Stores: IAnyModelType = types
   .model('StoresModel', {
     id: types.refinement(
       types.identifier,

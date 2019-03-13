@@ -1,13 +1,11 @@
 import Router from 'ette-router';
 import { updateStylesMiddleware, updateThemeMiddleware, buildNormalResponse } from 'ide-lib-base-component';
-import { getEnv } from 'mobx-state-tree';
-
 import { IContext } from './helper';
 import { TSwitchPanelControlledKeys } from '../schema/index';
 export const router = new Router();
 
 // 更新 store 属性
-router.put('panels', '/panels', async function(ctx: IContext) {
+router.put('updatePanels', '/panels', async function(ctx: IContext) {
   const { stores, request } = ctx;
   const { name, value } = request.data;
 
@@ -16,8 +14,7 @@ router.put('panels', '/panels', async function(ctx: IContext) {
 
   // 同时需要调整 editor 的高度
   if (name === 'height') {
-    const { clients } = getEnv(stores);
-    clients.codeEditor.model.setHeight(value);
+    stores.codeEditor.model.setHeight(value);
   }
 
   buildNormalResponse(ctx, 200, { success: isSuccess, origin: originValue }, `属性 ${name} 的值从 ${originValue} -> ${value} 的变更: ${isSuccess}`);
