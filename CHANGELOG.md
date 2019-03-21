@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.1.2"></a>
+## [0.1.2](https://github.com/alibaba-paimai-frontend/ide-switch-panel/compare/v0.1.1...v0.1.2) (2019-03-21)
+
+
+### Bug Fixes
+
+* **修复: 函数调用&类型声明:** 更改成 useInjectedEvents 方法；对 store 使用 IAnyModelType 声明，解决 schema/index.d.ts 无法导出的问 ([48aa5be](https://github.com/alibaba-paimai-frontend/ide-switch-panel/commit/48aa5be))
+* **类型声明:** 使用显式类型声明，解决无法导出 SwitchPanel/index.d.ts 的问题 ([56fad51](https://github.com/alibaba-paimai-frontend/ide-switch-panel/commit/56fad51))
+* **类型导出:** 解决无法导出 schema/index.d.ts 的问题，使用 IAnyModelType 类型 ([3fc68be](https://github.com/alibaba-paimai-frontend/ide-switch-panel/commit/3fc68be))
+* **组件默认值:** 给 based 方法传 DEFAULT_PROPS ([9173f72](https://github.com/alibaba-paimai-frontend/ide-switch-panel/commit/9173f72))
+
+
+### Features
+
+* **功能改善: 方法调用:** 简化 onSwitch 方法签名 ([58c7f45](https://github.com/alibaba-paimai-frontend/ide-switch-panel/commit/58c7f45))
+
+
+
 <a name="0.1.1"></a>
 ## 0.1.1 (2019-03-08)
 
