@@ -1,7 +1,7 @@
 // import { getValueByPath } from 'ide-lib-utils';
 import { IStoresEnv } from 'ide-lib-base-component';
-import { IStoresModel } from '../../schema/stores';
-import { IPanel } from '../../index';
+import { IStoresModel } from 'ide-lib-engine';
+import { IPanel } from '../../mods/Panel';
 // import { RPATH } from '../../router/helper'
 
 /**

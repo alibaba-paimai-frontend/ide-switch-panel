@@ -3,5 +3,5 @@ import { createDebuggers } from 'ide-lib-utils';
 const { debugBase, debugComp, debugError, debugIO, debugInteract, debugMini, debugModel, debugRender } = createDebuggers('switch-panel');
 
 export {
-  debugBase, debugComp, debugError, debugIO, debugInteract, debugMini, debugModel, debugRender
-}
+    debugBase, debugComp, debugError, debugIO, debugInteract, debugMini, debugModel, debugRender
+};

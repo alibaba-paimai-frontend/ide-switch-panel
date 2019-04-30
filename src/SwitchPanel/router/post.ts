@@ -1,10 +1,11 @@
 import Router from 'ette-router';
 import { isExist } from 'ide-lib-utils';
 import { buildNormalResponse } from 'ide-lib-base-component';
-
+import { createModel } from 'ide-lib-engine';
 
 import { IContext } from './helper';
-import { createModel } from '../schema/util';
+import { SwitchPanelModel } from '../../index';
+
 
 export const router = new Router();
 
@@ -13,7 +14,7 @@ router.post('createSwitchPanel', '/panels', function(ctx: IContext) {
   const { stores, request } = ctx;
   const { schema } = request.data;
 
-  stores.setModel(createModel(schema));
+  stores.setModel(createModel(SwitchPanelModel, schema));
 
   buildNormalResponse(ctx, 200, {success: true});
 });

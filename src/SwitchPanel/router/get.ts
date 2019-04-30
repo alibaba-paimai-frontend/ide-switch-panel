@@ -3,8 +3,6 @@ import { getInnerAppsMiddleware, buildNormalResponse } from 'ide-lib-base-compon
 
 
 import { IContext } from './helper';
-import { findById } from '../schema/util';
-
 export const router = new Router();
 
 // 默认获取所有的 panels，可以通过 filter 返回指定的属性值
@@ -22,7 +20,7 @@ router.get('getPanelById', '/panels/:id', function(ctx: IContext) {
   const { query } = request;
   const { id } = ctx.params;
   const filterArray = query && query.filter && query.filter.trim().split(',');
-  buildNormalResponse(ctx, 200, { panel: findById(stores.model, id, filterArray)});
+  buildNormalResponse(ctx, 200, { panel: stores.model.findPanel(id, filterArray)});
 });
 
 router.get('getClientByName', '/innerApps/:name', getInnerAppsMiddleware);

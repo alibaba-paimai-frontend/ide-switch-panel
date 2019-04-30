@@ -13,9 +13,9 @@ module.exports = common.map(config => {
     devServer: {
       contentBase: path.join(__dirname, targetDir),
       proxy: {
-        '/json.worker.js':'http://localhost:9005/dist/',
+        '/json.worker.js': 'http://localhost:9005/dist/',
         '/editor.worker.js': 'http://localhost:9005/dist/',
-        '/typescript.worker.js':'http://localhost:9005/dist/',
+        '/typescript.worker.js': 'http://localhost:9005/dist/',
       },
       port: 9000,
       hot: true

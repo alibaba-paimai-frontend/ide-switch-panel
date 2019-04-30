@@ -1,7 +1,6 @@
 import Router from 'ette-router';
 import { updateStylesMiddleware, updateThemeMiddleware, buildNormalResponse } from 'ide-lib-base-component';
 import { IContext } from './helper';
-import { TSwitchPanelControlledKeys } from '../schema/index';
 export const router = new Router();
 
 // 更新 store 属性
@@ -9,12 +8,13 @@ router.put('updatePanels', '/panels', async function(ctx: IContext) {
   const { stores, request } = ctx;
   const { name, value } = request.data;
 
-  const originValue = stores.model[name as TSwitchPanelControlledKeys];
+  const originValue = stores.model[name];
   const isSuccess = stores.model.updateAttribute(name, value);
 
   // 同时需要调整 editor 的高度
+  // TODO: 获取子 stores 改用调用函数的方式获取
   if (name === 'height') {
-    stores.codeEditor.model.setHeight(value);
+    (stores['codeEditor'] as any).model.setHeight(value);
   }
 
   buildNormalResponse(ctx, 200, { success: isSuccess, origin: originValue }, `属性 ${name} 的值从 ${originValue} -> ${value} 的变更: ${isSuccess}`);

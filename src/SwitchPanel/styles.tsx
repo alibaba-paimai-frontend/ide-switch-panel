@@ -10,7 +10,7 @@ interface IStyledProps extends ISwitchPanelProps, IBaseStyledProps { }
 
 export const StyledContainer = styled.div`
   height: ${(props: IStyledProps) =>
-  props.height ? ` ${props.height}px` : 'auto'};
+    props.height ? ` ${props.height}px` : 'auto'};
   width: ${(props: IStyledProps) =>
     props.width ? `${props.width}px` : 'auto'};
   display: flex;
@@ -19,16 +19,6 @@ export const StyledContainer = styled.div`
   
   & .ant-btn-group {
     display: flex;
-  }
-`;
-
-export const StyledButtonGroup = styled(ButtonGroup)`
-width: ${(props: IStyledProps) =>
-    props.width ? `${props.width}px` : 'auto'};
-  left: 0;
-  bottom:0;
-  &.ant-btn-group{
-    position: absolute;
   }
 `;
 

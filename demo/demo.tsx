@@ -32,7 +32,7 @@ render(<SwitchPanel {...props} onSwitch={onSwitch} />, document.getElementById(
 
 // ======= with store =========
 
-const { SwitchPanelWithStore, client } = SwitchPanelFactory();
+const { ComponentWithStore: SwitchPanelWithStore, client } = SwitchPanelFactory();
 
 function onSwitchWithClient(panel: IPanel, index: number) {
   console.log('[with client]当前点击：', panel, index);

@@ -3,17 +3,19 @@ const common = require('./webpack.common.js');
 const webpack = require('webpack');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+const CopyPlugin = require('copy-webpack-plugin');
+
 const path = require('path');
 const { getExternal } = require('./webpack-helper');
 
-const targetDir = 'dist';
+const targetDir = 'public';
 
 module.exports = common.map(config => {
-  /* 这份配置是用于引入到浏览器中时候用的
-     比如 https://unpkg.com/ide-switch-panel@0.1.2/dist/index.umd.js
-  */
+  /* 这份配置是用于发布 demo 到 gh-pages 分支使用的  */
   return merge(config, {
-    entry: './src/index.tsx',
+    entry: './demo/demo.tsx',
     externals: getExternal(["ide-code-editor"], true),
     mode: 'production',
     devtool: 'source-map',
@@ -22,15 +24,22 @@ module.exports = common.map(config => {
     },
     plugins: [
       new CleanWebpackPlugin(targetDir),
+      new HtmlWebpackPlugin({
+        title: 'demo 页面',
+        excludeChunks: ['index', 'index.js'],
+        // Load a custom template (lodash by default)
+        template: 'demo/index.html'
+      }),
       new webpack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify('production')
-      })
+      }),
+      new CopyPlugin([{ from: './.cache/works', to: './' }])
     ],
     output: {
-      filename: 'index.umd.js',
+      filename: 'demo.js',
+      path: path.resolve(__dirname, targetDir),
       libraryTarget: 'umd',
-      library: 'ideSwitchPanel',
-      path: path.resolve(__dirname, 'dist'),
+      library: 'ideSwitchPanelDemo',
       umdNamedDefine: true
     }
   });
