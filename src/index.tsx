@@ -11,6 +11,7 @@ import { configSwitchPanel } from './SwitchPanel/config';
 const {
     ComponentModel: SwitchPanelModel,
     NormalComponent: SwitchPanel,
+    StoresModel: SwitchPanelStoresModel,
     ComponentHOC: SwitchPanelHOC,
     ComponentAddStore: SwitchPanelAddStore,
     ComponentFactory: SwitchPanelFactory
@@ -18,6 +19,7 @@ const {
 
 export {
     SwitchPanelModel,
+    SwitchPanelStoresModel,
     SwitchPanel,
     SwitchPanelHOC,
     SwitchPanelAddStore,

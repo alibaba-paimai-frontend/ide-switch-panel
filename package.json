@@ -74,7 +74,8 @@
   },
   "dependencies": {
     "ide-function-sets": "^0.1.1",
-    "ide-iframe": "^0.1.1"
+    "ide-iframe": "^0.1.1",
+    "ide-lib-engine": "^0.1.4"
   },
   "peerDependencies": {
     "ide-code-editor": "x.x.x",

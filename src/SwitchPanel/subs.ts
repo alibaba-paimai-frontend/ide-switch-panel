@@ -16,15 +16,24 @@ import {
   DEFAULT_PROPS as DEFAULT_PROPS_IFRAME,
   IIFrameProps,
   IFrameFactory,
-  IStoresModel as IIFrameStoresModel,
   IFrameAddStore
 } from 'ide-iframe';
+
+import {
+  FunctionSets,
+  FunctionSetsStoresModel,
+  DEFAULT_PROPS as DEFAULT_PROPS_FUNCTION_SETS,
+  IFunctionSetsProps,
+  FunctionSetsFactory,
+  FunctionSetsAddStore
+} from 'ide-function-sets';
 
 
 
 export interface ISubProps {
   codeEditor?: ICodeEditorProps;
   previewer?: IIFrameProps;
+  fnSets?: IFunctionSetsProps;
 }
 
 // component: 子组件属性列表
@@ -52,5 +61,17 @@ export const subComponents: Record<
     storesModel: IFrameStores,
     factory: IFrameFactory,
     routeScope: ['iframe'] // 能通过父组件访问到的路径
-  }
+  },
+
+  fnSets: {
+    className: 'FunctionSets',
+    namedAs: 'fnSets',
+    defaultProps: DEFAULT_PROPS_FUNCTION_SETS,
+    normal: FunctionSets,
+    addStore: FunctionSetsAddStore,
+    storesModel: FunctionSetsStoresModel,
+    factory: FunctionSetsFactory,
+    routeScope: ['model'] // 能通过父组件访问到的路径
+  },
+
 };

@@ -8,7 +8,8 @@ import { StyledButtonGroup} from './styles'
 // 不同面板对应的类型，目前只有 编辑器 和 iframe 两种
 export enum EPanelType {
     editor = 'editor',
-    iframe = 'iframe'
+    iframe = 'iframe',
+    funcs = 'funcs',
 }
 
 export interface IPanel {

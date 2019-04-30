@@ -47,9 +47,9 @@ export const DEFAULT_PROPS: ISwitchPanelProps = {
       type: EPanelType.editor
     },
     {
-      id: 'fns',
+      id: 'funcs',
       title: '回调函数',
-      type: EPanelType.editor
+      type: EPanelType.funcs
     }
   ],
   width: '100%',
@@ -65,7 +65,7 @@ export const SwitchPanelCurrying: TComponentCurrying<
   ISwitchPanelProps,
   ISubProps
 > = subComponents => props => {
-  const { CodeEditor: CodeEditorComponent, IFrame: IFrameComponent } = subComponents as Record<
+  const { CodeEditor: CodeEditorComponent, IFrame: IFrameComponent, FunctionSets: FunctionSetsComponent  } = subComponents as Record<
   string,
   React.FunctionComponent<typeof props>
   >;
@@ -74,6 +74,7 @@ export const SwitchPanelCurrying: TComponentCurrying<
   const {
     codeEditor = {},
     previewer = {},
+    fnSets = {},
     styles,
     panels,
     selectedIndex,
@@ -128,6 +129,13 @@ export const SwitchPanelCurrying: TComponentCurrying<
       <StyledPanelWrap visible={selectedPanel.type === EPanelType.editor}>
         <CodeEditorComponent {...codeEditor} />
       </StyledPanelWrap>
+
+      <StyledPanelWrap visible={selectedPanel.type === EPanelType.funcs}>
+        <FunctionSetsComponent {...fnSets} />
+      </StyledPanelWrap>
+
+
+
       <Panels
         panels={panels}
         width={width}
