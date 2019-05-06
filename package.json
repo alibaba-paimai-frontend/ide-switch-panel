@@ -73,7 +73,6 @@
     "webpack-merge": "^4.1.4"
   },
   "dependencies": {
-    "@rehooks/component-size": "^1.0.2",
     "ide-function-sets": "^0.1.1",
     "ide-iframe": "^0.1.1",
     "ide-lib-engine": "^0.1.4"

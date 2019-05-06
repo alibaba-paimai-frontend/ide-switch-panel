@@ -1,8 +1,11 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react';
-import { IBaseTheme, IBaseComponentProps } from 'ide-lib-base-component';
+import {
+  IBaseTheme,
+  IBaseComponentProps,
+  useComponentSize
+} from 'ide-lib-base-component';
 
 import { TComponentCurrying } from 'ide-lib-engine';
-import useComponentSize from '@rehooks/component-size';
 
 import { StyledContainer, StyledPanelWrap } from './styles';
 
