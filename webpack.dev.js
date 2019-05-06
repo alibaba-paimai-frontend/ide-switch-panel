@@ -22,7 +22,7 @@ module.exports = common.map(config => {
     },
     plugins: [
       new HtmlWebpackPlugin({
-        title: 'demo 页面',
+        title: 'ide-switch-panel',
         excludeChunks: ['index', 'index.js'],
         // Load a custom template (lodash by default)
         template: 'demo/index.html'

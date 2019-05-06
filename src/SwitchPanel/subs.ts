@@ -28,8 +28,6 @@ import {
   FunctionSetsAddStore
 } from 'ide-function-sets';
 
-
-
 export interface ISubProps {
   codeEditor?: ICodeEditorProps;
   previewer?: IIFrameProps;
@@ -72,6 +70,5 @@ export const subComponents: Record<
     storesModel: FunctionSetsStoresModel,
     factory: FunctionSetsFactory,
     routeScope: ['model'] // 能通过父组件访问到的路径
-  },
-
+  }
 };

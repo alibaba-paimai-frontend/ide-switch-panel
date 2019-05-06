@@ -1,14 +1,15 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { IBaseTheme, IBaseComponentProps } from 'ide-lib-base-component';
 
 import { TComponentCurrying } from 'ide-lib-engine';
+import useComponentSize from '@rehooks/component-size';
 
 import { StyledContainer, StyledPanelWrap } from './styles';
 
 import { ISubProps } from './subs';
-import { EPanelType, Panels, IPanel, IPanelProps} from './mods/Panel';
+import { EPanelType, Panels, IPanel, IPanelProps } from './mods/Panel';
 
-export interface ISwitchPanelEvent { }
+export interface ISwitchPanelEvent {}
 // export interface ISwitchPanelStyles extends IBaseStyles {
 //   container?: React.CSSProperties;
 // }
@@ -19,10 +20,9 @@ export interface ISwitchPanelTheme extends IBaseTheme {
 
 export interface ISwitchPanelProps
   extends ISwitchPanelEvent,
-  IPanelProps,
-  ISubProps,
-  IBaseComponentProps {
-
+    IPanelProps,
+    ISubProps,
+    IBaseComponentProps {
   /**
    * 容器的高度
    *
@@ -52,7 +52,6 @@ export const DEFAULT_PROPS: ISwitchPanelProps = {
       type: EPanelType.funcs
     }
   ],
-  width: '100%',
   theme: {
     main: '#25ab68'
   },
@@ -65,12 +64,15 @@ export const SwitchPanelCurrying: TComponentCurrying<
   ISwitchPanelProps,
   ISubProps
 > = subComponents => props => {
-  const { CodeEditor: CodeEditorComponent, IFrame: IFrameComponent, FunctionSets: FunctionSetsComponent  } = subComponents as Record<
-  string,
-  React.FunctionComponent<typeof props>
-  >;
+  const {
+    CodeEditor: CodeEditorComponent,
+    IFrame: IFrameComponent,
+    FunctionSets: FunctionSetsComponent
+  } = subComponents as Record<string, React.FunctionComponent<typeof props>>;
 
-  const mergedProps = Object.assign({}, DEFAULT_PROPS, props);
+  let ref = useRef(null);
+  const { width, height } = useComponentSize(ref);
+
   const {
     codeEditor = {},
     previewer = {},
@@ -78,10 +80,10 @@ export const SwitchPanelCurrying: TComponentCurrying<
     styles,
     panels,
     selectedIndex,
-    height,
-    width,
+    cHeight,
+    cWidth,
     buttonHeight
-  } = mergedProps;
+  } = props;
 
   // 需要同步更新子元素的宽度
   codeEditor.width = width;
@@ -115,10 +117,12 @@ export const SwitchPanelCurrying: TComponentCurrying<
 
   return (
     <StyledContainer
-      style={styles.container}
-      height={height}
+      ref={ref}
+      style={Object.assign({}, styles.container, {
+        width: cWidth,
+        height: cHeight
+      })}
       buttonHeight={buttonHeight}
-      width={width}
       // ref={this.root}
       className="ide-switch-panel-container"
     >
@@ -131,10 +135,12 @@ export const SwitchPanelCurrying: TComponentCurrying<
       </StyledPanelWrap>
 
       <StyledPanelWrap visible={selectedPanel.type === EPanelType.funcs}>
-        <FunctionSetsComponent {...fnSets} />
+        <FunctionSetsComponent
+          cWidth={width}
+          cHeight={height - buttonHeight}
+          {...fnSets}
+        />
       </StyledPanelWrap>
-
-
 
       <Panels
         panels={panels}

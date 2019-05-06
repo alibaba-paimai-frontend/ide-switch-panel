@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { render } from 'react-dom';
+import { Collapse } from 'antd';
 import {
   SwitchPanel,
   ISwitchPanelProps,
@@ -8,13 +9,15 @@ import {
 } from '../src/';
 import { schema } from './schema';
 
+const Panel = Collapse.Panel;
+
 function onSwitch(panel: IPanel, index: number) {
   console.log('当前点击：', panel, index);
 }
 
 const props: ISwitchPanelProps = {
-  width: 400,
-  height: 200,
+  cWidth: 400,
+  cHeight: 200,
   codeEditor: {
     value: '',
     onChange: value => {
@@ -26,13 +29,12 @@ const props: ISwitchPanelProps = {
   }
 };
 
-render(<SwitchPanel {...props} onSwitch={onSwitch} />, document.getElementById(
-  'example'
-) as HTMLElement);
-
 // ======= with store =========
 
-const { ComponentWithStore: SwitchPanelWithStore, client } = SwitchPanelFactory();
+const {
+  ComponentWithStore: SwitchPanelWithStore,
+  client
+} = SwitchPanelFactory();
 
 function onSwitchWithClient(panel: IPanel, index: number) {
   console.log('[with client]当前点击：', panel, index);
@@ -43,12 +45,19 @@ function onSwitchWithClient(panel: IPanel, index: number) {
 }
 
 render(
-  <SwitchPanelWithStore
-    width={600}
-    height={300}
-    onSwitch={onSwitchWithClient}
-  />,
-  document.getElementById('example-stores') as HTMLElement
+  <Collapse defaultActiveKey={['1']}>
+    <Panel header="普通组件" key="0">
+      <SwitchPanel {...props} onSwitch={onSwitch} />
+    </Panel>
+    <Panel header="包含 store 功能" key="1">
+      <SwitchPanelWithStore
+        cWidth={'100%'}
+        cHeight={300}
+        onSwitch={onSwitchWithClient}
+      />
+    </Panel>
+  </Collapse>,
+  document.getElementById('example') as HTMLElement
 );
 
 // 更改地址
@@ -56,7 +65,6 @@ client.put('/clients/previewer/iframe', {
   name: 'url',
   value: 'http://localhost:9006/gourd2/pi/demo/index.html?from=ide'
 });
-
 
 setTimeout(() => {
   // 然后传递数据
@@ -69,4 +77,3 @@ setTimeout(() => {
     }
   });
 }, 2000);
-

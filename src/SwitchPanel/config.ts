@@ -40,8 +40,6 @@ export const configSwitchPanel: IModuleConfig<ISwitchPanelProps, ISubProps> = {
   model: {
     controlledKeys: [], // 后续再初始化
     props: {
-      height: types.optional(types.union(types.number, types.string), 'auto'),
-      width: types.optional(types.union(types.number, types.string), 'auto'),
       selectedIndex: types.optional(types.number, 0),
       panels: types.array(types.late((): IAnyModelType => PanelModel)) // 在 mst v3 中， `types.array` 默认值就是 `[]`
       // language: types.optional(
