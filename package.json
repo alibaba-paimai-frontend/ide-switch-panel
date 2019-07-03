@@ -73,9 +73,9 @@
     "webpack-merge": "^4.1.4"
   },
   "dependencies": {
-    "ide-function-sets": "^0.1.1",
-    "ide-iframe": "^0.1.1",
-    "ide-lib-engine": "^0.1.4"
+    "ide-function-sets": "0.1.x",
+    "ide-iframe": "0.1.x",
+    "ide-lib-engine": "0.1.x"
   },
   "peerDependencies": {
     "ide-code-editor": "x.x.x",

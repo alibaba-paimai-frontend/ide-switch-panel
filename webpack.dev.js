@@ -15,9 +15,9 @@ module.exports = common.map(config => {
       proxy: {
         '/json.worker.js': 'http://localhost:9005/dist/',
         '/editor.worker.js': 'http://localhost:9005/dist/',
-        '/typescript.worker.js': 'http://localhost:9005/dist/',
+        '/typescript.worker.js': 'http://localhost:9005/dist/'
       },
-      port: 9000,
+      port: process.env.PORT || 9000,
       hot: true
     },
     plugins: [
